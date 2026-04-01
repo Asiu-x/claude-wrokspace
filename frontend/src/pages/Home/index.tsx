@@ -891,8 +891,8 @@ const Home: React.FC = () => {
           );
         })()}
 
-        {/* 模型网状展示 */}
-        <section className="py-28 px-4 bg-zinc-50/50">
+        {/* 模型生态 - Circuit Board 拓扑 */}
+        <section className="py-28 px-4 bg-white overflow-hidden">
           <div className="container mx-auto max-w-6xl">
             <motion.div
               className="text-center mb-14"
@@ -914,108 +914,145 @@ const Home: React.FC = () => {
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              {recommendedModels.length > 0 ? (
-                <div className="relative min-h-[500px] rounded-3xl border border-zinc-200/60 bg-white/80 backdrop-blur-sm overflow-hidden" style={{
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 8px 32px -8px rgba(0,0,0,0.06)',
-                }}>
-                  {/* 中心装饰 */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-[300px] h-[300px] rounded-full bg-blue-50/50 blur-[80px]" />
-                  </div>
+              {recommendedModels.length > 0 ? (() => {
+                // 节点布局：中心 + 左4右4
+                const nodes = recommendedModels.slice(0, 8);
+                const cx = 500, cy = 280; // 中心坐标（基于 1000x560 视口）
+                const positions = [
+                  // 左侧 4 个
+                  { x: 80, y: 80 }, { x: 100, y: 240 }, { x: 80, y: 400 }, { x: 260, y: 470 },
+                  // 右侧 4 个
+                  { x: 740, y: 470 }, { x: 920, y: 400 }, { x: 900, y: 240 }, { x: 920, y: 80 },
+                ];
 
-                  {/* 网状连线 SVG */}
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.15 }}>
-                    {recommendedModels.slice(0, 8).map((_, i) => {
-                      const angle1 = (i / 8) * Math.PI * 2 - Math.PI / 2;
-                      const cx = 50, cy = 50, r = 35;
-                      const x1 = cx + Math.cos(angle1) * r;
-                      const y1 = cy + Math.sin(angle1) * r;
-                      // 连到相邻两个节点和中心
-                      const nextIdx = (i + 1) % 8;
-                      const angle2 = (nextIdx / 8) * Math.PI * 2 - Math.PI / 2;
-                      const x2 = cx + Math.cos(angle2) * r;
-                      const y2 = cy + Math.sin(angle2) * r;
-                      return (
-                        <g key={i}>
-                          <line x1={`${x1}%`} y1={`${y1}%`} x2={`${x2}%`} y2={`${y2}%`} stroke="#6366f1" strokeWidth="1" />
-                          <line x1={`${x1}%`} y1={`${y1}%`} x2={`${cx}%`} y2={`${cy}%`} stroke="#6366f1" strokeWidth="0.5" />
-                        </g>
-                      );
-                    })}
-                  </svg>
+                // 生成正交折线路径（从中心到节点）
+                const getPath = (nx: number, ny: number) => {
+                  const midX = nx < cx ? cx - 60 : cx + 60;
+                  return `M ${cx} ${cy} H ${midX} V ${ny} H ${nx}`;
+                };
 
-                  {/* 中心节点 */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                    <motion.div
-                      className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      <Library className="h-8 w-8 text-white" />
-                    </motion.div>
-                    <div className="text-center mt-2">
-                      <div className="text-sm font-bold text-zinc-900">模型中心</div>
-                      <div className="text-xs text-zinc-400">{counts.models} 个模型</div>
-                    </div>
-                  </div>
+                return (
+                  <div className="relative rounded-3xl overflow-hidden bg-grid-zinc" style={{
+                    maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 50%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 50%, transparent 100%)',
+                  }}>
+                    <svg viewBox="0 0 1000 560" className="w-full" style={{ minHeight: 480 }}>
+                      <defs>
+                        {/* 流光渐变 */}
+                        {nodes.map((_, i) => (
+                          <linearGradient key={`grad-${i}`} id={`flow-grad-${i}`} gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
+                            <stop offset="40%" stopColor="#6366f1" stopOpacity="0.6" />
+                            <stop offset="60%" stopColor="#818cf8" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                          </linearGradient>
+                        ))}
+                      </defs>
 
-                  {/* 环形分布的模型节点 */}
-                  <div className="relative w-full h-[500px]">
-                    {recommendedModels.slice(0, 8).map((model, i) => {
-                      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-                      const radius = 38; // 百分比
-                      const left = 50 + Math.cos(angle) * radius;
-                      const top = 50 + Math.sin(angle) * radius;
-                      const colors = ['bg-blue-50 text-blue-600', 'bg-violet-50 text-violet-600', 'bg-emerald-50 text-emerald-600', 'bg-amber-50 text-amber-600'];
-                      const colorClass = colors[i % colors.length];
-                      return (
-                        <motion.div
-                          key={model.id}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer group"
-                          style={{ left: `${left}%`, top: `${top}%` }}
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                          whileHover={{ scale: 1.1, zIndex: 20 }}
-                          onClick={() => navigate(`/models/${model.id}`)}
-                        >
-                          <div className="w-[160px] p-3.5 rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all group-hover:shadow-md group-hover:border-indigo-100">
-                            {/* 模型名 - 字体设计 */}
-                            <div className="mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                              <span className="text-[13px] font-black tracking-tight bg-gradient-to-r from-zinc-800 to-zinc-600 bg-clip-text text-transparent">
-                                {model.name}
-                              </span>
-                            </div>
-                            {/* 参数量 + 来源 */}
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-500 font-bold font-mono tracking-tight">{model.parameters}</span>
-                              {model.source && (
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>
-                                  {model.source}
-                                </span>
-                              )}
-                            </div>
-                            {/* 框架 + 评分 */}
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] text-zinc-400 font-medium">{model.framework}</span>
-                              <div className="flex items-center gap-0.5">
-                                <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
-                                <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1) || '4.5'}</span>
+                      {/* 正交折线连线 */}
+                      {nodes.map((_, i) => {
+                        const p = positions[i];
+                        const d = getPath(p.x, p.y);
+                        const pathLen = Math.abs(cx - p.x) + Math.abs(cy - p.y) + 60;
+                        return (
+                          <g key={`line-${i}`}>
+                            {/* 底线 */}
+                            <path d={d} fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" />
+                            {/* 流光 */}
+                            <path d={d} fill="none" stroke={`url(#flow-grad-${i})`} strokeWidth="2" strokeLinecap="round"
+                              strokeDasharray={`${pathLen * 0.15} ${pathLen * 0.85}`}
+                            >
+                              <animate
+                                attributeName="stroke-dashoffset"
+                                values={`${pathLen};${-pathLen * 0.15}`}
+                                dur={`${2.5 + i * 0.4}s`}
+                                repeatCount="indefinite"
+                              />
+                            </path>
+                          </g>
+                        );
+                      })}
+
+                      {/* 中心枢纽 */}
+                      {/* 脉冲波纹 */}
+                      {[0, 1, 2].map(ring => (
+                        <circle key={`pulse-${ring}`} cx={cx} cy={cy} fill="none" stroke="#6366f1" strokeWidth="1">
+                          <animate attributeName="r" values="28;60" dur="3s" begin={`${ring * 1}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.3;0" dur="3s" begin={`${ring * 1}s`} repeatCount="indefinite" />
+                        </circle>
+                      ))}
+                      {/* 核心圆 - 玻璃质感 */}
+                      <circle cx={cx} cy={cy} r="32" fill="url(#core-gradient)" />
+                      <circle cx={cx} cy={cy} r="32" fill="none" stroke="white" strokeWidth="1" opacity="0.3" />
+                      <circle cx={cx} cy={cy} r="28" fill="none" stroke="white" strokeWidth="0.5" opacity="0.15" />
+                      {/* 核心渐变 */}
+                      <defs>
+                        <radialGradient id="core-gradient" cx="45%" cy="40%">
+                          <stop offset="0%" stopColor="#818cf8" />
+                          <stop offset="60%" stopColor="#6366f1" />
+                          <stop offset="100%" stopColor="#4f46e5" />
+                        </radialGradient>
+                      </defs>
+                      {/* 核心图标文字 */}
+                      <text x={cx} y={cy - 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="800" fontFamily="Inter, system-ui">AI</text>
+                      <text x={cx} y={cy + 10} textAnchor="middle" fill="white" fontSize="8" fontWeight="500" opacity="0.7" fontFamily="Inter, system-ui">模型中心</text>
+
+                      {/* 节点连接端点小圆 */}
+                      {nodes.map((_, i) => {
+                        const p = positions[i];
+                        return <circle key={`dot-${i}`} cx={p.x} cy={p.y} r="3" fill="#e4e4e7" />;
+                      })}
+                    </svg>
+
+                    {/* 模型卡片 - HTML 叠加在 SVG 上 */}
+                    <div className="absolute inset-0" style={{ pointerEvents: 'none' }}>
+                      {nodes.map((model, i) => {
+                        const p = positions[i];
+                        // 转换为百分比
+                        const leftPct = (p.x / 1000) * 100;
+                        const topPct = (p.y / 560) * 100;
+                        return (
+                          <motion.div
+                            key={model.id}
+                            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                            style={{ left: `${leftPct}%`, top: `${topPct}%`, pointerEvents: 'auto' }}
+                            initial={{ opacity: 0, scale: 0.6 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.2 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                            whileHover={{ scale: 1.08, y: -4 }}
+                            onClick={() => navigate(`/models/${model.id}`)}
+                          >
+                            <div className="w-[150px] p-3 rounded-xl border border-zinc-200 bg-white transition-all duration-200 group-hover:border-indigo-300 group-hover:shadow-lg group-hover:shadow-indigo-100/40" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                              <div className="mb-1.5" style={{ fontFamily: "'Inter', system-ui" }}>
+                                <span className="text-[12px] font-black tracking-tight text-zinc-800">{model.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
+                                {model.source && (
+                                  <span className={`text-[8px] px-1 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
+                                )}
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                          </motion.div>
+                        );
+                      })}
+
+                      {/* 中心枢纽标签 */}
+                      <div className="absolute" style={{ left: '50%', top: `${(cy / 560) * 100}%`, transform: 'translate(-50%, 44px)' }}>
+                        <div className="text-center">
+                          <div className="text-sm font-bold text-zinc-900">{counts.models} 个模型</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="h-[500px] bg-zinc-50 rounded-3xl animate-pulse" />
+                );
+              })() : (
+                <div className="h-[480px] bg-zinc-50 rounded-3xl animate-pulse" />
               )}
 
               {/* 底部入口 */}
-              <div className="text-center mt-8">
+              <div className="text-center mt-10">
                 <motion.button
                   className="hero-btn-glow px-8 py-3 text-white rounded-full font-semibold text-sm inline-flex items-center gap-2"
                   whileHover={{ scale: 1.04 }}
