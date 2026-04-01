@@ -932,14 +932,10 @@ const Home: React.FC = () => {
               {recommendedModels.length > 0 ? (() => {
                 const models20 = recommendedModels.slice(0, 20);
                 const VB = 1200; const C = VB / 2;
-                // 4 层轨道，分配模型
-                const orbitConfig = [
-                  { r: 100, count: 3, speed: 80 },
-                  { r: 190, count: 4, speed: 110 },
-                  { r: 290, count: 5, speed: 150 },
-                  { r: 400, count: 4, speed: 200 },
-                  { r: 500, count: 4, speed: 250 },
-                ];
+                // 5 层同心圆轨道
+                const orbits = [110, 200, 300, 410, 520];
+                // 每层分配节点数
+                const layerCounts = [2, 4, 5, 5, 4];
                 // 分配模型到各轨道
                 let idx = 0;
                 const orbitModels = orbitConfig.map(cfg => {
