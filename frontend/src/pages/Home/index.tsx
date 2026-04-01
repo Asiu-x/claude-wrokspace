@@ -665,11 +665,11 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* 高校案例轮播 */}
-        <section className="py-28 px-4 bg-white overflow-hidden">
-          <div className="container mx-auto max-w-6xl">
+        {/* 高校合作案例 - Infinite Marquee */}
+        <section className="py-28 bg-white overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4">
             <motion.div
-              className="text-center mb-14"
+              className="text-center mb-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
@@ -680,70 +680,74 @@ const Home: React.FC = () => {
                 与全国高校深度合作，打造标杆AI落地案例
               </p>
             </motion.div>
+          </div>
 
-            {/* 无限滚动轮播 */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {featuredCases.length > 0 ? (
-                <div className="relative">
-                  {/* 左右淡出遮罩 */}
-                  <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-                  <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-
-                  <div className="overflow-hidden" ref={casesScrollRef}>
+          {/* 跑马灯容器 - 全宽 */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {featuredCases.length > 0 ? (
+              <div
+                className="marquee-track relative group/marquee"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+                }}
+              >
+                <div className="marquee-inner flex gap-5">
+                  {[...featuredCases, ...featuredCases, ...featuredCases, ...featuredCases].map((caseItem, idx) => (
                     <motion.div
-                      className="flex gap-14 items-start"
-                      animate={{ x: ['0%', '-50%'] }}
-                      transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                      key={`${caseItem.id}-${idx}`}
+                      className="flex-shrink-0 w-[280px] rounded-2xl bg-white border border-zinc-200 p-5 cursor-pointer transition-colors duration-200 hover:border-violet-400"
+                      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}
+                      whileHover={{ scale: 1.04, boxShadow: '0 8px 30px -6px rgba(139, 92, 246, 0.15), 0 2px 6px rgba(0,0,0,0.04)' }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                      onClick={() => navigate(`/cases/${caseItem.id}`)}
                     >
-                      {[...featuredCases, ...featuredCases].map((caseItem, idx) => (
-                        <motion.div
-                          key={`${caseItem.id}-${idx}`}
-                          className="flex-shrink-0 w-[240px] flex flex-col items-center cursor-pointer group"
-                          whileHover={{ y: -8 }}
-                          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                          onClick={() => navigate(`/cases/${caseItem.id}`)}
-                        >
-                          {/* 校徽 - 超大醒目 */}
-                          <div className="w-36 h-36 rounded-3xl bg-white border-2 border-zinc-100 flex items-center justify-center mb-5 shadow-lg shadow-zinc-200/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-violet-200/40 group-hover:border-violet-300 group-hover:scale-110 overflow-hidden">
-                            {caseItem.logoUrl ? (
-                              <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-24 h-24 object-contain" />
-                            ) : (
-                              <Building2 className="h-16 w-16 text-violet-300 group-hover:text-violet-500 transition-colors" />
-                            )}
-                          </div>
-                          {/* 案例名 - 大字醒目 */}
-                          <div className="text-base font-extrabold text-zinc-900 text-center leading-tight mb-2 px-2 line-clamp-2">{caseItem.title}</div>
-                          {/* 高校名 + 等级 */}
-                          <div className="flex items-center gap-1.5 justify-center">
-                            <span className="text-sm text-zinc-400 font-medium">{caseItem.university || caseItem.organization}</span>
-                            {caseItem.universityLevel && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 font-bold">{caseItem.universityLevel}</span>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))}
+                      {/* 顶部：Logo + 标签 */}
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="w-11 h-11 rounded-full bg-zinc-50 border border-zinc-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {caseItem.logoUrl ? (
+                            <img src={caseItem.logoUrl} alt="" className="w-8 h-8 object-contain" />
+                          ) : (
+                            <Building2 className="h-5 w-5 text-zinc-400" />
+                          )}
+                        </div>
+                        {caseItem.universityLevel && (
+                          <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${
+                            caseItem.universityLevel === '985'
+                              ? 'bg-violet-100/80 text-violet-600'
+                              : caseItem.universityLevel === '211'
+                              ? 'bg-blue-100/80 text-blue-600'
+                              : 'bg-zinc-100 text-zinc-500'
+                          }`}>
+                            {caseItem.universityLevel}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 中间留白 + 模型名 */}
+                      <div className="mb-3">
+                        <h4 className="text-[15px] font-extrabold text-zinc-900 leading-snug line-clamp-2">{caseItem.title}</h4>
+                      </div>
+
+                      {/* 高校名 */}
+                      <div className="text-sm text-zinc-500 font-medium">{caseItem.university || caseItem.organization}</div>
                     </motion.div>
-                  </div>
-                </div>
-              ) : (
-                /* 骨架屏 */
-                <div className="flex gap-10 justify-center overflow-hidden">
-                  {[0,1,2,3,4,5].map(i => (
-                    <div key={i} className="flex-shrink-0 w-[200px] flex flex-col items-center gap-3">
-                      <div className="w-20 h-20 bg-zinc-100 rounded-2xl animate-pulse" />
-                      <div className="w-24 h-4 bg-zinc-100 rounded animate-pulse" />
-                      <div className="w-32 h-3 bg-zinc-50 rounded animate-pulse" />
-                    </div>
                   ))}
                 </div>
-              )}
-            </motion.div>
-          </div>
+              </div>
+            ) : (
+              <div className="flex gap-5 justify-center px-4">
+                {[0,1,2,3,4].map(i => (
+                  <div key={i} className="flex-shrink-0 w-[280px] h-[160px] bg-zinc-50 rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            )}
+          </motion.div>
         </section>
 
         {/* 模型网状展示 */}
