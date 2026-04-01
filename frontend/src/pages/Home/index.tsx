@@ -948,23 +948,11 @@ const Home: React.FC = () => {
                     style={{ width: '100%', maxWidth: 900, aspectRatio: '1/1' }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
-                    {/* SVG 底层 */}
+                    {/* SVG 装饰星尘 */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 900">
-                      {/* 200 颗密集星尘铺满 */}
-                      {denseStars.map((s, i) => (
-                        <circle key={`s-${i}`} cx={s.x} cy={s.y} r={s.size} fill="#818cf8" opacity={s.opacity}>
-                          <animate attributeName="opacity" values={`${s.opacity};${s.opacity + 0.12};${s.opacity}`} dur={`${s.dur}s`} repeatCount="indefinite" />
-                        </circle>
-                      ))}
-                      {/* 虚线轨道 */}
-                      {orbitRadii.map((r, oi) => (
-                        <circle key={`o-${oi}`} cx="450" cy="450" r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.3" />
-                      ))}
-                      {/* 脉冲 */}
-                      {[0, 1, 2].map(ring => (
-                        <circle key={`p-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1.2 - ring * 0.2}>
-                          <animate attributeName="r" values={`${35 + ring * 10};${80 + ring * 25}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
+                      {bgStars.map((s, i) => (
+                        <circle key={`bg-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o}>
+                          <animate attributeName="opacity" values={`${s.o};${s.o + 0.1};${s.o}`} dur={`${s.d}s`} repeatCount="indefinite" />
                         </circle>
                       ))}
                     </svg>
@@ -978,70 +966,69 @@ const Home: React.FC = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                       >
-                        <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/60">
+                        <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/50">
                           {counts.models}+
                         </div>
-                        <div className="text-sm text-zinc-300 font-medium mt-2 tracking-wide">接入生态模型</div>
+                        <div className="text-sm text-zinc-300/60 font-medium mt-2 tracking-wide">接入生态模型</div>
                       </motion.div>
                     </div>
 
-                    {/* 12 个模型星辰节点 */}
-                    {layers.map((layer, oi) => layer.map((model, mi) => {
-                      const flatIdx = layers.slice(0, oi).reduce((s, l) => s + l.length, 0) + mi;
-                      const r = orbitRadii[oi];
-                      const angle = layerAngles[oi][mi];
-                      const rad = (angle * Math.PI) / 180;
-                      const leftPct = ((450 + Math.cos(rad) * r) / 900) * 100;
-                      const topPct = ((450 + Math.sin(rad) * r) / 900) * 100;
-                      const isHovered = hoveredModel === flatIdx;
-                      const dotSize = [7, 6, 5, 4][oi];
+                    {/* 12 个可交互模型星辰 - 铺满 */}
+                    {allModels.map((model, i) => {
+                      const pos = modelPositions[i];
+                      const isHovered = hoveredModel === i;
+                      const dotPx = pos.size * 2;
 
                       return (
                         <div
                           key={model.id}
                           className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-                          style={{ left: `${leftPct}%`, top: `${topPct}%` }}
-                          onMouseEnter={() => setHoveredModel(flatIdx)}
+                          style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                          onMouseEnter={() => setHoveredModel(i)}
                           onMouseLeave={() => setHoveredModel(null)}
                         >
                           <motion.div
                             className="cursor-pointer relative"
-                            animate={{ scale: isHovered ? 1.8 : 1 }}
+                            animate={{ scale: isHovered ? 2 : 1 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                             onClick={() => navigate(`/models/${model.id}`)}
                           >
+                            {/* 星辰点 */}
                             <div
-                              className={`rounded-full transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/40' : 'bg-indigo-400/70'}`}
-                              style={{ width: dotSize * 2, height: dotSize * 2 }}
+                              className={`rounded-full transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/50' : 'bg-indigo-400/80'}`}
+                              style={{ width: dotPx, height: dotPx }}
                             />
+                            {/* hover 光晕 */}
                             {isHovered && (
                               <div
                                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                                style={{ width: dotSize * 6, height: dotSize * 6, background: 'radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%)' }}
+                                style={{ width: dotPx * 4, height: dotPx * 4, background: 'radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%)' }}
                               />
                             )}
+                            {/* 模型名标签 */}
                             {!isHovered && (
-                              <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap" style={{ top: dotSize * 2 + 6, fontFamily: "'Inter', system-ui" }}>
-                                <span className="text-[10px] font-bold text-zinc-400">{model.name}</span>
+                              <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap" style={{ top: dotPx + 6, fontFamily: "'Inter', system-ui" }}>
+                                <span className="text-[11px] font-bold text-zinc-400">{model.name}</span>
                               </div>
                             )}
                           </motion.div>
 
+                          {/* Hover 详情面板 */}
                           <AnimatePresence>
                             {isHovered && (
                               <motion.div
                                 className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
                                 style={{
-                                  left: leftPct > 50 ? 'auto' : '100%',
-                                  right: leftPct > 50 ? '100%' : 'auto',
+                                  left: pos.x > 50 ? 'auto' : '100%',
+                                  right: pos.x > 50 ? '100%' : 'auto',
                                   top: '50%', transform: 'translateY(-50%)',
-                                  marginLeft: leftPct > 50 ? 0 : 12,
-                                  marginRight: leftPct > 50 ? 12 : 0,
+                                  marginLeft: pos.x > 50 ? 0 : 16,
+                                  marginRight: pos.x > 50 ? 16 : 0,
                                   boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
                                 }}
-                                initial={{ opacity: 0, scale: 0.9, x: leftPct > 50 ? 8 : -8 }}
+                                initial={{ opacity: 0, scale: 0.92, x: pos.x > 50 ? 10 : -10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
+                                exit={{ opacity: 0, scale: 0.92 }}
                                 transition={{ duration: 0.2 }}
                               >
                                 <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{model.name}</div>
@@ -1067,7 +1054,7 @@ const Home: React.FC = () => {
                           </AnimatePresence>
                         </div>
                       );
-                    }))}
+                    })}
                   </div>
                 );
               })() : (
