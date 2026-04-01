@@ -916,12 +916,11 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
             >
               {recommendedModels.length > 0 ? (() => {
-                // 用全部 12 个模型铺满，每个都是可交互星辰
                 const allModels = recommendedModels.slice(0, 12);
                 // 黄金角螺旋分布，铺满整个区域
                 const modelPositions = allModels.map((_, i) => {
                   const goldenAngle = i * 2.39996;
-                  const dist = 80 + Math.sqrt(i / allModels.length) * 340;
+                  const dist = 80 + Math.sqrt(i / allModels.length) * 350;
                   return {
                     x: ((450 + Math.cos(goldenAngle) * dist) / 900) * 100,
                     y: ((450 + Math.sin(goldenAngle) * dist) / 900) * 100,
