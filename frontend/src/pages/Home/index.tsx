@@ -223,11 +223,6 @@ const Home: React.FC = () => {
   const casesScrollRef = useRef<HTMLDivElement>(null);
   const [spotlightIdx, setSpotlightIdx] = useState(0);
   const [hoveredModel, setHoveredModel] = useState<number | null>(null);
-  const [orbitTime, setOrbitTime] = useState(() => Date.now() / 1000);
-  useEffect(() => {
-    const timer = setInterval(() => setOrbitTime(Date.now() / 1000), 100);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     DashboardAPI.getFeaturedCases(8).then((res) => {
