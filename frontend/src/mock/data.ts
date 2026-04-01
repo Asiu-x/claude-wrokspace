@@ -303,6 +303,14 @@ const CASE_SCENARIOS = [
 const CASE_UNIVERSITIES = ['江南大学', '北京中医药大学', '武汉理工大学', '中国地质大学（武汉）', '中国人民大学', '内蒙古师范大学'];
 const CASE_UNIVERSITY_LEVELS = ['211', '211', '211', '211', '985', '省属重点'];
 const CASE_COOPERATION_TYPES = ['校企合作', '校企合作', '校企合作', '校企合作', '自主训练', '校企合作'];
+const CASE_LOGO_URLS = [
+  '/images/universities/jiangnan.webp',
+  '/images/universities/bucm.webp',
+  '/images/universities/whut.webp',
+  '/images/universities/cug.webp',
+  '/images/universities/ruc.webp',
+  '/images/universities/imnu.webp',
+];
 const CASE_OUTCOMES = [
   ['深度赋能教学全过程，实现"教"与"学"双向赋能', '大幅提升文献调研效率，加速知识转化与产业服务', '树立"AI+食品"转型典范，形成可借鉴的"江南大学方案"'],
   ['建成中药学科特色语料库，总量超500TB', '形成"五助一体"智能教育应用体系', '已在北京中医药大学及10所联合高校上线'],
