@@ -696,30 +696,35 @@ const Home: React.FC = () => {
 
                   <div className="overflow-hidden" ref={casesScrollRef}>
                     <motion.div
-                      className="flex gap-10 items-start"
+                      className="flex gap-14 items-start"
                       animate={{ x: ['0%', '-50%'] }}
-                      transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                      transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
                     >
-                      {/* 复制两份实现无缝循环 */}
                       {[...featuredCases, ...featuredCases].map((caseItem, idx) => (
                         <motion.div
                           key={`${caseItem.id}-${idx}`}
-                          className="flex-shrink-0 w-[200px] flex flex-col items-center cursor-pointer group"
-                          whileHover={{ y: -4 }}
+                          className="flex-shrink-0 w-[240px] flex flex-col items-center cursor-pointer group"
+                          whileHover={{ y: -8 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                           onClick={() => navigate(`/cases/${caseItem.id}`)}
                         >
-                          {/* 校徽 */}
-                          <div className="w-24 h-24 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-3 shadow-sm transition-all group-hover:shadow-md group-hover:border-violet-200 group-hover:scale-105 overflow-hidden">
+                          {/* 校徽 - 超大醒目 */}
+                          <div className="w-36 h-36 rounded-3xl bg-white border-2 border-zinc-100 flex items-center justify-center mb-5 shadow-lg shadow-zinc-200/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-violet-200/40 group-hover:border-violet-300 group-hover:scale-110 overflow-hidden">
                             {caseItem.logoUrl ? (
-                              <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-16 h-16 object-contain" />
+                              <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-24 h-24 object-contain" />
                             ) : (
-                              <Building2 className="h-10 w-10 text-violet-400 group-hover:text-violet-500 transition-colors" />
+                              <Building2 className="h-16 w-16 text-violet-300 group-hover:text-violet-500 transition-colors" />
                             )}
                           </div>
-                          {/* 高校名 */}
-                          <div className="text-sm font-bold text-zinc-800 text-center truncate w-full">{caseItem.university || caseItem.organization}</div>
-                          {/* 案例名 */}
-                          <div className="text-[11px] text-zinc-400 text-center mt-1 line-clamp-2 leading-snug px-1">{caseItem.title}</div>
+                          {/* 案例名 - 大字醒目 */}
+                          <div className="text-base font-extrabold text-zinc-900 text-center leading-tight mb-2 px-2 line-clamp-2">{caseItem.title}</div>
+                          {/* 高校名 + 等级 */}
+                          <div className="flex items-center gap-1.5 justify-center">
+                            <span className="text-sm text-zinc-400 font-medium">{caseItem.university || caseItem.organization}</span>
+                            {caseItem.universityLevel && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 font-bold">{caseItem.universityLevel}</span>
+                            )}
+                          </div>
                         </motion.div>
                       ))}
                     </motion.div>
