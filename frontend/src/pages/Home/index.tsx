@@ -930,30 +930,27 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
             >
               {recommendedModels.length > 0 ? (() => {
-                const allModels = recommendedModels.slice(0, 12);
-                // 黄金角螺旋分布，铺满整个区域
-                const modelPositions = allModels.map((_, i) => {
-                  const goldenAngle = i * 2.39996;
-                  const dist = 80 + Math.sqrt(i / allModels.length) * 350;
-                  return {
-                    x: ((450 + Math.cos(goldenAngle) * dist) / 900) * 100,
-                    y: ((450 + Math.sin(goldenAngle) * dist) / 900) * 100,
-                    size: 8 - Math.floor(i / 3), // 内大外小 8→5
-                  };
+                const models20 = recommendedModels.slice(0, 20);
+                // 4 层轨道，分配模型
+                const orbitConfig = [
+                  { r: 130, count: 3, speed: 80 },
+                  { r: 210, count: 5, speed: 110 },
+                  { r: 290, count: 6, speed: 150 },
+                  { r: 370, count: 6, speed: 200 },
+                ];
+                // 分配模型到各轨道
+                let idx = 0;
+                const orbitModels = orbitConfig.map(cfg => {
+                  const slice = models20.slice(idx, idx + cfg.count);
+                  idx += cfg.count;
+                  return { ...cfg, models: slice };
                 });
-                // 装饰星尘
-                const bgStars: { x: number; y: number; s: number; o: number; d: number }[] = [];
-                for (let i = 0; i < 150; i++) {
-                  const a = i * 2.39996 + 1.5;
-                  const dist = 30 + Math.sqrt(i / 150) * 430;
-                  bgStars.push({
-                    x: 450 + Math.cos(a) * dist,
-                    y: 450 + Math.sin(a) * dist,
-                    s: 0.6 + (i % 4) * 0.3,
-                    o: 0.04 + (i % 6) * 0.02,
-                    d: 3 + (i % 9) * 0.4,
-                  });
-                }
+                // 背景星尘
+                const bgStars = Array.from({ length: 120 }, (_, i) => {
+                  const a = i * 2.39996 + 0.7;
+                  const d = 40 + Math.sqrt(i / 120) * 420;
+                  return { x: 450 + Math.cos(a) * d, y: 450 + Math.sin(a) * d, s: 0.5 + (i % 4) * 0.3, o: 0.04 + (i % 5) * 0.015 };
+                });
 
                 return (
                   <div
@@ -961,113 +958,126 @@ const Home: React.FC = () => {
                     style={{ width: '100%', maxWidth: 900, aspectRatio: '1/1' }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
-                    {/* SVG 装饰星尘 */}
+                    {/* SVG 底层：星尘 + 轨道 */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 900">
                       {bgStars.map((s, i) => (
-                        <circle key={`bg-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o}>
-                          <animate attributeName="opacity" values={`${s.o};${s.o + 0.1};${s.o}`} dur={`${s.d}s`} repeatCount="indefinite" />
+                        <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
+                      ))}
+                      {orbitConfig.map((o, i) => (
+                        <circle key={`orb-${i}`} cx="450" cy="450" r={o.r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
+                      ))}
+                      {[0, 1, 2].map(ring => (
+                        <circle key={`p-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1}>
+                          <animate attributeName="r" values={`${30 + ring * 8};${70 + ring * 20}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
                       ))}
                     </svg>
 
-                    {/* 中心数字 - 底层 */}
+                    {/* 中心数字 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none text-center">
-                      <motion.div
-                        className="relative"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                      >
-                        <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/50">
-                          {counts.models}+
-                        </div>
-                        <div className="text-sm text-zinc-300/60 font-medium mt-2 tracking-wide">接入生态模型</div>
-                      </motion.div>
+                      <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/40">
+                        {counts.models}+
+                      </div>
+                      <div className="text-sm text-zinc-300/50 font-medium mt-2 tracking-wide">接入生态模型</div>
                     </div>
 
-                    {/* 12 个可交互模型星辰 - 铺满 */}
-                    {allModels.map((model, i) => {
-                      const pos = modelPositions[i];
-                      const isHovered = hoveredModel === i;
-                      const dotPx = pos.size * 2;
+                    {/* 旋转轨道层 + 20 个可交互星辰 */}
+                    {orbitModels.map((orbit, oi) => (
+                      <motion.div
+                        key={`ol-${oi}`}
+                        className="absolute inset-0"
+                        animate={{ rotate: oi % 2 === 0 ? 360 : -360 }}
+                        transition={{ duration: orbit.speed, repeat: Infinity, ease: 'linear' }}
+                      >
+                        {orbit.models.map((model, mi) => {
+                          const flatIdx = orbitModels.slice(0, oi).reduce((s, o) => s + o.models.length, 0) + mi;
+                          const angle = (mi / orbit.count) * 360 + [0, 20, 10, 30][oi];
+                          const rad = (angle * Math.PI) / 180;
+                          const left = 50 + (Math.cos(rad) * orbit.r / 900) * 100;
+                          const top = 50 + (Math.sin(rad) * orbit.r / 900) * 100;
+                          const isHovered = hoveredModel === flatIdx;
+                          const dotSize = [14, 12, 10, 9][oi];
 
-                      return (
-                        <div
-                          key={model.id}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-                          style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-                          onMouseEnter={() => setHoveredModel(i)}
-                          onMouseLeave={() => setHoveredModel(null)}
-                        >
-                          <motion.div
-                            className="cursor-pointer relative"
-                            animate={{ scale: isHovered ? 2 : 1 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                            onClick={() => navigate(`/models/${model.id}`)}
-                          >
-                            {/* 星辰点 */}
-                            <div
-                              className={`rounded-full transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/50' : 'bg-indigo-400/80'}`}
-                              style={{ width: dotPx, height: dotPx }}
-                            />
-                            {/* hover 光晕 */}
-                            {isHovered && (
+                          return (
+                            <motion.div
+                              key={model.id || `m-${flatIdx}`}
+                              className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+                              style={{ left: `${left}%`, top: `${top}%` }}
+                              // 反向旋转保持水平
+                              animate={{
+                                rotate: oi % 2 === 0 ? -360 : 360,
+                                scale: isHovered ? 1.6 : 1,
+                              }}
+                              transition={{
+                                rotate: { duration: orbit.speed, repeat: Infinity, ease: 'linear' },
+                                scale: { type: 'spring', stiffness: 400, damping: 20 },
+                              }}
+                              onMouseEnter={() => setHoveredModel(flatIdx)}
+                              onMouseLeave={() => setHoveredModel(null)}
+                            >
                               <div
-                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                                style={{ width: dotPx * 4, height: dotPx * 4, background: 'radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%)' }}
+                                className={`rounded-full cursor-pointer transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/50' : 'bg-indigo-400/70'}`}
+                                style={{ width: dotSize, height: dotSize }}
+                                onClick={() => navigate(`/models/${model.id}`)}
                               />
-                            )}
-                            {/* 模型名标签 */}
-                            {!isHovered && (
-                              <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap" style={{ top: dotPx + 6, fontFamily: "'Inter', system-ui" }}>
-                                <span className="text-[11px] font-bold text-zinc-400">{model.name}</span>
-                              </div>
-                            )}
-                          </motion.div>
-
-                          {/* Hover 详情面板 */}
-                          <AnimatePresence>
-                            {isHovered && (
-                              <motion.div
-                                className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
-                                style={{
-                                  left: pos.x > 50 ? 'auto' : '100%',
-                                  right: pos.x > 50 ? '100%' : 'auto',
-                                  top: '50%', transform: 'translateY(-50%)',
-                                  marginLeft: pos.x > 50 ? 0 : 16,
-                                  marginRight: pos.x > 50 ? 16 : 0,
-                                  boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
-                                }}
-                                initial={{ opacity: 0, scale: 0.92, x: pos.x > 50 ? 10 : -10 }}
-                                animate={{ opacity: 1, scale: 1, x: 0 }}
-                                exit={{ opacity: 0, scale: 0.92 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{model.name}</div>
-                                <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{model.description}</p>
-                                <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
-                                  {model.source && (
-                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
-                                  )}
-                                  <span className="text-[9px] text-zinc-400 font-medium">{model.framework}</span>
+                              {/* 名称标签 */}
+                              {!isHovered && (
+                                <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none" style={{ top: dotSize + 4, fontFamily: "'Inter', system-ui" }}>
+                                  <span className="text-[10px] font-bold text-zinc-400">{model.name}</span>
                                 </div>
-                                <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
-                                  <div className="flex items-center gap-0.5">
-                                    <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                                    <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1)}</span>
-                                  </div>
-                                  <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
-                                    查看详情 <ArrowRight className="h-2.5 w-2.5" />
-                                  </span>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      );
-                    })}
+                              )}
+                              {/* 光晕 */}
+                              {isHovered && (
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+                                  style={{ width: dotSize * 4, height: dotSize * 4, background: 'radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%)' }}
+                                />
+                              )}
+                              {/* Hover 详情 */}
+                              <AnimatePresence>
+                                {isHovered && (
+                                  <motion.div
+                                    className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
+                                    style={{
+                                      left: left > 50 ? 'auto' : '100%',
+                                      right: left > 50 ? '100%' : 'auto',
+                                      top: '50%', transform: 'translateY(-50%)',
+                                      marginLeft: left > 50 ? 0 : 14,
+                                      marginRight: left > 50 ? 14 : 0,
+                                      boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
+                                    }}
+                                    initial={{ opacity: 0, scale: 0.92 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.92 }}
+                                    transition={{ duration: 0.2 }}
+                                    onClick={(e) => { e.stopPropagation(); navigate(`/models/${model.id}`); }}
+                                  >
+                                    <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{model.name}</div>
+                                    <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{model.description}</p>
+                                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
+                                      {model.source && (
+                                        <span className={`text-[8px] px-1.5 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
+                                      )}
+                                      <span className="text-[9px] text-zinc-400">{model.framework}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
+                                      <div className="flex items-center gap-0.5">
+                                        <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                                        <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1)}</span>
+                                      </div>
+                                      <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
+                                        查看详情 <ArrowRight className="h-2.5 w-2.5" />
+                                      </span>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    ))}
                   </div>
                 );
               })() : (
