@@ -933,10 +933,11 @@ const Home: React.FC = () => {
                 const models20 = recommendedModels.slice(0, 20);
                 // 4 层轨道，分配模型
                 const orbitConfig = [
-                  { r: 130, count: 3, speed: 80 },
-                  { r: 210, count: 5, speed: 110 },
-                  { r: 290, count: 6, speed: 150 },
-                  { r: 370, count: 6, speed: 200 },
+                  { r: 100, count: 3, speed: 80 },
+                  { r: 190, count: 4, speed: 110 },
+                  { r: 290, count: 5, speed: 150 },
+                  { r: 400, count: 4, speed: 200 },
+                  { r: 500, count: 4, speed: 250 },
                 ];
                 // 分配模型到各轨道
                 let idx = 0;
