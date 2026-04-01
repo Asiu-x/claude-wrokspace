@@ -892,7 +892,7 @@ const Home: React.FC = () => {
           );
         })()}
 
-        {/* 模型生态 - 宏大行星轨道 */}
+        {/* 模型生态 - 星辰图 */}
         <section className="py-28 px-4 bg-[#FCFCFC] overflow-hidden">
           <div className="container mx-auto max-w-7xl">
             <motion.div
