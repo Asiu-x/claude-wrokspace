@@ -852,7 +852,7 @@ const Home: React.FC = () => {
                                       <img
                                         src={caseItem.logoUrl}
                                         alt=""
-                                        className="w-[80%] h-[80%] max-w-[360px] max-h-[360px] object-contain opacity-[0.06]"
+                                        className="w-[80%] h-[80%] max-w-[360px] max-h-[360px] object-contain opacity-[0.15]"
                                       />
                                     ) : (
                                       <Building2 className="w-[60%] h-[60%] text-zinc-900 opacity-[0.04]" strokeWidth={0.5} />
