@@ -983,62 +983,71 @@ const Home: React.FC = () => {
                       <div className="text-sm text-zinc-300/50 font-medium mt-2 tracking-wide">接入生态模型</div>
                     </div>
 
-                    {/* 旋转轨道层 + 20 个可交互星辰 */}
-                    {orbitModels.map((orbit, oi) => (
-                      <motion.div
-                        key={`ol-${oi}`}
-                        className="absolute inset-0"
-                        animate={{ rotate: oi % 2 === 0 ? 360 : -360 }}
-                        transition={{ duration: orbit.speed, repeat: Infinity, ease: 'linear' }}
-                      >
-                        {orbit.models.map((model, mi) => {
+                    {/* SVG 旋转轨道上的点（纯视觉） */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1200">
+                      {orbitModels.map((orbit, oi) => (
+                        <g key={`rot-${oi}`}>
+                          <animateTransform attributeName="transform" type="rotate" from={`0 600 600`} to={`${oi % 2 === 0 ? 360 : -360} 600 600`} dur={`${orbit.speed}s`} repeatCount="indefinite" />
+                          {orbit.models.map((model, mi) => {
+                            const angle = (mi / orbit.count) * 360 + [0, 20, 10, 30, 15][oi];
+                            const rad = (angle * Math.PI) / 180;
+                            const cx = 600 + Math.cos(rad) * orbit.r;
+                            const cy = 600 + Math.sin(rad) * orbit.r;
+                            const flatIdx = orbitModels.slice(0, oi).reduce((s, o) => s + o.models.length, 0) + mi;
+                            const isHovered = hoveredModel === flatIdx;
+                            const dotR = [7, 6, 5.5, 5, 4.5][oi];
+                            return (
+                              <circle key={`node-${flatIdx}`} cx={cx} cy={cy} r={isHovered ? dotR * 1.8 : dotR}
+                                fill={isHovered ? '#6366f1' : 'rgba(99,102,241,0.7)'}
+                                style={{ transition: 'r 0.3s ease, fill 0.3s ease' }}
+                              />
+                            );
+                          })}
+                        </g>
+                      ))}
+                    </svg>
+
+                    {/* 固定交互层（不旋转） - 用 JS 计时器更新位置 */}
+                    {(() => {
+                      // 用当前时间计算每个节点的实时位置
+                      const now = Date.now() / 1000;
+                      return orbitModels.map((orbit, oi) =>
+                        orbit.models.map((model, mi) => {
                           const flatIdx = orbitModels.slice(0, oi).reduce((s, o) => s + o.models.length, 0) + mi;
-                          const angle = (mi / orbit.count) * 360 + [0, 20, 10, 30, 15][oi];
-                          const rad = (angle * Math.PI) / 180;
+                          const baseAngle = (mi / orbit.count) * 360 + [0, 20, 10, 30, 15][oi];
+                          const rotSpeed = (oi % 2 === 0 ? 1 : -1) * (360 / orbit.speed);
+                          const currentAngle = baseAngle + rotSpeed * now;
+                          const rad = (currentAngle * Math.PI) / 180;
                           const left = 50 + (Math.cos(rad) * orbit.r / 1200) * 100;
                           const top = 50 + (Math.sin(rad) * orbit.r / 1200) * 100;
                           const isHovered = hoveredModel === flatIdx;
                           const dotSize = [14, 12, 11, 10, 9][oi];
 
                           return (
-                            <motion.div
-                              key={model.id || `m-${flatIdx}`}
+                            <div
+                              key={`hit-${flatIdx}`}
                               className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
                               style={{ left: `${left}%`, top: `${top}%` }}
-                              // 反向旋转保持水平
-                              animate={{
-                                rotate: oi % 2 === 0 ? -360 : 360,
-                                scale: isHovered ? 1.6 : 1,
-                              }}
-                              transition={{
-                                rotate: { duration: orbit.speed, repeat: Infinity, ease: 'linear' },
-                                scale: { type: 'spring', stiffness: 400, damping: 20 },
-                              }}
                               onMouseEnter={() => setHoveredModel(flatIdx)}
                               onMouseLeave={() => setHoveredModel(null)}
                             >
+                              {/* 透明 hover 触发区 */}
                               <div
-                                className={`rounded-full cursor-pointer transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/50' : 'bg-indigo-400/70'}`}
-                                style={{ width: dotSize, height: dotSize }}
+                                className="cursor-pointer"
+                                style={{ width: dotSize * 3, height: dotSize * 3, marginLeft: -dotSize * 1.5, marginTop: -dotSize * 1.5 }}
                                 onClick={() => navigate(`/models/${model.id}`)}
                               />
                               {/* 名称标签 */}
                               {!isHovered && (
-                                <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none" style={{ top: dotSize + 4, fontFamily: "'Inter', system-ui" }}>
+                                <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none" style={{ top: dotSize / 2 + 8, fontFamily: "'Inter', system-ui" }}>
                                   <span className="text-[10px] font-bold text-zinc-400">{model.name}</span>
                                 </div>
                               )}
-                              {/* 光晕 */}
-                              {isHovered && (
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-                                  style={{ width: dotSize * 4, height: dotSize * 4, background: 'radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%)' }}
-                                />
-                              )}
-                              {/* Hover 详情 */}
+                              {/* Hover 详情面板 */}
                               <AnimatePresence>
                                 {isHovered && (
                                   <motion.div
-                                    className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
+                                    className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg pointer-events-auto"
                                     style={{
                                       left: left > 50 ? 'auto' : '100%',
                                       right: left > 50 ? '100%' : 'auto',
@@ -1051,6 +1060,8 @@ const Home: React.FC = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.92 }}
                                     transition={{ duration: 0.2 }}
+                                    onMouseEnter={() => setHoveredModel(flatIdx)}
+                                    onMouseLeave={() => setHoveredModel(null)}
                                     onClick={(e) => { e.stopPropagation(); navigate(`/models/${model.id}`); }}
                                   >
                                     <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{model.name}</div>
@@ -1074,11 +1085,11 @@ const Home: React.FC = () => {
                                   </motion.div>
                                 )}
                               </AnimatePresence>
-                            </motion.div>
+                            </div>
                           );
-                        })}
-                      </motion.div>
-                    ))}
+                        })
+                      );
+                    })()}
                   </div>
                 );
               })() : (
