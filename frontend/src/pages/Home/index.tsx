@@ -931,7 +931,7 @@ const Home: React.FC = () => {
             >
               {recommendedModels.length > 0 ? (() => {
                 const models20 = recommendedModels.slice(0, 20);
-                const cx = 600, cy = 600; // 基于 1200x1200 视口中心
+                const VB = 1200; const C = VB / 2;
                 // 4 层轨道，分配模型
                 const orbitConfig = [
                   { r: 100, count: 3, speed: 80 },
