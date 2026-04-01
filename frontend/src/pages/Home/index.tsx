@@ -951,34 +951,27 @@ const Home: React.FC = () => {
                   >
                     {/* SVG 底层 */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 900">
-                      {orbitRadii.map((r, oi) => (
-                        <circle key={`o-${oi}`} cx="450" cy="450" r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.4" />
+                      {/* 200 颗密集星尘铺满 */}
+                      {denseStars.map((s, i) => (
+                        <circle key={`s-${i}`} cx={s.x} cy={s.y} r={s.size} fill="#818cf8" opacity={s.opacity}>
+                          <animate attributeName="opacity" values={`${s.opacity};${s.opacity + 0.12};${s.opacity}`} dur={`${s.dur}s`} repeatCount="indefinite" />
+                        </circle>
                       ))}
+                      {/* 虚线轨道 */}
+                      {orbitRadii.map((r, oi) => (
+                        <circle key={`o-${oi}`} cx="450" cy="450" r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.3" />
+                      ))}
+                      {/* 脉冲 */}
                       {[0, 1, 2].map(ring => (
                         <circle key={`p-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1.2 - ring * 0.2}>
                           <animate attributeName="r" values={`${35 + ring * 10};${80 + ring * 25}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="0.2;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
-                      ))}
-                      {orbitRadii.map((r, oi) => (
-                        <g key={`dg-${oi}`}>
-                          <animateTransform attributeName="transform" type="rotate" from="0 450 450" to="360 450 450" dur={`${120 + oi * 40}s`} repeatCount="indefinite" />
-                          {bgDust.filter(d => d.oi === oi).map((d) => {
-                            const rad = (d.angle * Math.PI) / 180;
-                            return (
-                              <circle key={`bd-${d.oi}-${d.di}`} cx={450 + Math.cos(rad) * d.r} cy={450 + Math.sin(rad) * d.r} r={d.size} fill="#a5b4fc" opacity={d.baseOpacity}>
-                                <animate attributeName="opacity" values={`${d.baseOpacity};${d.baseOpacity + 0.2};${d.baseOpacity}`} dur={`${3 + d.di * 0.2}s`} repeatCount="indefinite" />
-                              </circle>
-                            );
-                          })}
-                        </g>
                       ))}
                     </svg>
 
-                    {/* 中心数字 */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] rounded-full bg-indigo-200/20 blur-[60px]" />
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full bg-violet-300/15 blur-[40px]" />
+                    {/* 中心数字 - 底层 */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none text-center">
                       <motion.div
                         className="relative"
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -986,10 +979,10 @@ const Home: React.FC = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                       >
-                        <div className="text-6xl md:text-7xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-600 to-purple-800 bg-clip-text text-transparent">
+                        <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/60">
                           {counts.models}+
                         </div>
-                        <div className="text-sm text-zinc-400 font-medium mt-2 tracking-wide">接入生态模型</div>
+                        <div className="text-sm text-zinc-300 font-medium mt-2 tracking-wide">接入生态模型</div>
                       </motion.div>
                     </div>
 
