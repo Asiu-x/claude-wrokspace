@@ -839,31 +839,24 @@ const Home: React.FC = () => {
                                   </motion.div>
                                 </div>
 
-                                {/* 右侧：大校徽展示 */}
-                                <div className="w-[55%] relative flex items-center justify-center overflow-hidden">
+                                {/* 右侧：校徽融入背景 */}
+                                <div className="w-[55%] relative overflow-hidden">
                                   <motion.div
-                                    className="relative"
-                                    initial={{ opacity: 0, scale: 0.85 }}
+                                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                                    initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                                   >
-                                    {/* 校徽光晕 */}
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                      <div className="w-[280px] h-[280px] rounded-full bg-indigo-100/30 blur-[60px]" />
-                                    </div>
-                                    {/* 校徽主体 */}
-                                    <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-3xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg shadow-zinc-200/40 overflow-hidden">
-                                      {caseItem.logoUrl ? (
-                                        <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-36 h-36 md:w-40 md:h-40 object-contain" />
-                                      ) : (
-                                        <Building2 className="h-20 w-20 text-zinc-300" />
-                                      )}
-                                    </div>
-                                    {/* 校名 */}
-                                    <div className="text-center mt-5">
-                                      <div className="text-lg font-bold text-zinc-700">{caseItem.university || caseItem.organization}</div>
-                                    </div>
+                                    {caseItem.logoUrl ? (
+                                      <img
+                                        src={caseItem.logoUrl}
+                                        alt=""
+                                        className="w-[80%] h-[80%] max-w-[360px] max-h-[360px] object-contain opacity-[0.06]"
+                                      />
+                                    ) : (
+                                      <Building2 className="w-[60%] h-[60%] text-zinc-900 opacity-[0.04]" strokeWidth={0.5} />
+                                    )}
                                   </motion.div>
                                 </div>
                               </motion.div>
