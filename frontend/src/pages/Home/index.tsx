@@ -1017,13 +1017,12 @@ const Home: React.FC = () => {
                     {/* 固定交互层（不旋转） - 用 JS 计时器更新位置 */}
                     {(() => {
                       // 用当前时间计算每个节点的实时位置
-                      const now = Date.now() / 1000;
                       return orbitModels.map((orbit, oi) =>
                         orbit.models.map((model, mi) => {
                           const flatIdx = orbitModels.slice(0, oi).reduce((s, o) => s + o.models.length, 0) + mi;
                           const baseAngle = (mi / orbit.count) * 360 + [0, 20, 10, 30, 15][oi];
                           const rotSpeed = (oi % 2 === 0 ? 1 : -1) * (360 / orbit.speed);
-                          const currentAngle = baseAngle + rotSpeed * now;
+                          const currentAngle = baseAngle + rotSpeed * orbitTime;
                           const rad = (currentAngle * Math.PI) / 180;
                           const left = 50 + (Math.cos(rad) * orbit.r / 1200) * 100;
                           const top = 50 + (Math.sin(rad) * orbit.r / 1200) * 100;
