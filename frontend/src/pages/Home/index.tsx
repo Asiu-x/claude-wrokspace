@@ -750,48 +750,66 @@ const Home: React.FC = () => {
                         )}
 
                         <div className="relative z-0 h-full p-8 md:p-10 flex flex-col justify-between">
-                          {/* 顶行：Logo + 学科 + 标签 */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-zinc-50 border border-zinc-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                {caseItem.logoUrl ? (
-                                  <img src={caseItem.logoUrl} alt="" className="w-7 h-7 object-contain" />
-                                ) : (
-                                  <Building2 className="h-4 w-4 text-zinc-300" />
-                                )}
-                              </div>
-                              <span className="text-[13px] text-zinc-400 font-medium tracking-wide">{caseItem.subjects?.join(' · ') || '学科案例'}</span>
-                            </div>
-                            {caseItem.universityLevel && (
-                              <span className={`text-[11px] px-3 py-1 rounded-full font-bold ${
-                                caseItem.universityLevel === '985'
-                                  ? 'bg-violet-50 text-violet-500'
-                                  : caseItem.universityLevel === '211'
-                                  ? 'bg-blue-50 text-blue-500'
-                                  : 'bg-zinc-50 text-zinc-400'
-                              }`}>
-                                {caseItem.universityLevel}
-                              </span>
-                            )}
+                          {/* 权威水印 - 高校首字 */}
+                          <div className="absolute bottom-4 right-6 text-[160px] font-black leading-none text-zinc-900/[0.03] pointer-events-none select-none" style={{ fontFamily: "'Inter', system-ui" }}>
+                            {(caseItem.university || '校')[0]}
                           </div>
 
-                          {/* 主标题区 - 主次分明 */}
+                          {/* 顶部：联合背书区 */}
                           <div>
-                            <h3 className="hero-gradient-text-light text-4xl md:text-[2.75rem] font-black tracking-tight leading-[1.1] mb-2">
-                              {modelName}
-                            </h3>
-                            {subtitle && (
-                              <p className="text-lg font-medium text-zinc-400 leading-snug">{subtitle}</p>
+                            <div className="flex items-center gap-3 mb-5">
+                              {/* AI能力中心 Logo */}
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                                  <span className="text-white text-[9px] font-black">AI</span>
+                                </div>
+                                <span className="text-[11px] text-zinc-400 font-medium">能力中心</span>
+                              </div>
+                              {/* 联合符号 */}
+                              <span className="text-zinc-300 text-sm font-light">✕</span>
+                              {/* 高校校徽 + 全称 */}
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-full bg-white border border-zinc-100 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+                                  {caseItem.logoUrl ? (
+                                    <img src={caseItem.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                                  ) : (
+                                    <Building2 className="h-4 w-4 text-zinc-300" />
+                                  )}
+                                </div>
+                                <span className="text-[15px] text-zinc-900 font-extrabold tracking-tight">{caseItem.university || caseItem.organization}</span>
+                              </div>
+                            </div>
+
+                            {/* 荣誉徽章 */}
+                            {caseItem.universityLevel && (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md border bg-amber-50/50 border-amber-200/80">
+                                <Award className="h-3 w-3 text-amber-600" />
+                                <span className="text-[11px] font-bold text-amber-700 tracking-wide">
+                                  {caseItem.universityLevel === '985' ? '国家985工程重点建设高校' : caseItem.universityLevel === '211' ? '国家211工程重点建设高校' : caseItem.universityLevel + ' 重点高校'}
+                                </span>
+                              </div>
                             )}
                           </div>
 
-                          {/* 底行：高校名 + 幽灵按钮 */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-[13px] font-medium text-zinc-400">{caseItem.university || caseItem.organization}</span>
-                            <span
-                              className="text-[13px] font-medium text-zinc-400 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-600"
-                            >
-                              了解更多 <ArrowRight className="h-3.5 w-3.5" />
+                          {/* 中下部：模型成果 */}
+                          <div>
+                            <div className="text-[11px] text-zinc-400 font-semibold tracking-widest uppercase mb-2">深度共建成果</div>
+                            <h3 className="text-xl md:text-2xl font-medium text-zinc-800 tracking-tight leading-snug line-clamp-2">
+                              {caseItem.title}
+                            </h3>
+                            {caseItem.subjects?.length > 0 && (
+                              <div className="flex items-center gap-2 mt-2.5">
+                                {caseItem.subjects.map((s, sIdx) => (
+                                  <span key={sIdx} className="text-[11px] px-2 py-0.5 rounded bg-zinc-50 text-zinc-400 font-medium">{s}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* 底行：幽灵按钮 */}
+                          <div className="flex items-center justify-end">
+                            <span className="text-[13px] font-medium text-zinc-400 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-600">
+                              查看案例详情 <ArrowRight className="h-3.5 w-3.5" />
                             </span>
                           </div>
                         </div>
