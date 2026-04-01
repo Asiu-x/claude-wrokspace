@@ -1007,7 +1007,7 @@ const Home: React.FC = () => {
                       ))}
                     </svg>
 
-                    {/* 中心数字 */}
+                    {/* 中心数字 - 底层 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none text-center">
                       <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/40">
                         {counts.models}+
