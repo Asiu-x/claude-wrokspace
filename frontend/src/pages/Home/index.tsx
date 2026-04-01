@@ -960,15 +960,15 @@ const Home: React.FC = () => {
                     onMouseLeave={() => setHoveredModel(null)}
                   >
                     {/* SVG 底层：星尘 + 轨道 */}
-                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 900">
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 1200">
                       {bgStars.map((s, i) => (
                         <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
                       ))}
                       {orbitConfig.map((o, i) => (
-                        <circle key={`orb-${i}`} cx="450" cy="450" r={o.r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
+                        <circle key={`orb-${i}`} cx="600" cy="600" r={o.r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
                       ))}
                       {[0, 1, 2].map(ring => (
-                        <circle key={`p-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1}>
+                        <circle key={`p-${ring}`} cx="600" cy="600" fill="none" stroke="#6366f1" strokeWidth={1}>
                           <animate attributeName="r" values={`${30 + ring * 8};${70 + ring * 20}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                           <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
