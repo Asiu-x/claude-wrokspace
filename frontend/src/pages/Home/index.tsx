@@ -830,24 +830,28 @@ const Home: React.FC = () => {
                           whileHover={{ scale: 1.1, zIndex: 20 }}
                           onClick={() => navigate(`/models/${model.id}`)}
                         >
-                          <div className="w-[160px] p-3.5 rounded-2xl border border-zinc-100 bg-white shadow-sm transition-shadow group-hover:shadow-md">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className={`p-1.5 rounded-lg ${colorClass.split(' ')[0]} inline-flex`}>
-                                <Zap className={`h-3.5 w-3.5 ${colorClass.split(' ')[1]}`} />
-                              </div>
+                          <div className="w-[160px] p-3.5 rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all group-hover:shadow-md group-hover:border-indigo-100">
+                            {/* 模型名 - 字体设计 */}
+                            <div className="mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                              <span className="text-[13px] font-black tracking-tight bg-gradient-to-r from-zinc-800 to-zinc-600 bg-clip-text text-transparent">
+                                {model.name}
+                              </span>
+                            </div>
+                            {/* 参数量 + 来源 */}
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-500 font-bold font-mono tracking-tight">{model.parameters}</span>
                               {model.source && (
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-blue-50 text-blue-500' : 'bg-zinc-50 text-zinc-400'}`}>
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>
                                   {model.source}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs font-bold text-zinc-800 truncate">{model.name}</div>
-                            <div className="text-[10px] text-zinc-400 mt-0.5 truncate">{model.description?.slice(0, 20) || model.framework}</div>
-                            <div className="flex items-center justify-between mt-2">
-                              <span className="text-[10px] text-zinc-400 font-medium">{model.parameters}</span>
+                            {/* 框架 + 评分 */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-zinc-400 font-medium">{model.framework}</span>
                               <div className="flex items-center gap-0.5">
-                                <Star className="h-2.5 w-2.5 text-amber-400" />
-                                <span className="text-[10px] text-zinc-400 font-medium">{model.rating?.toFixed(1) || '4.5'}</span>
+                                <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+                                <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1) || '4.5'}</span>
                               </div>
                             </div>
                           </div>
