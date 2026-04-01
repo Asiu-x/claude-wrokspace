@@ -928,16 +928,20 @@ const Home: React.FC = () => {
                 const layerAngles = layers.map((l, oi) =>
                   l.map((_, i) => (i / l.length) * 360 + [45, 30, 20, 50][oi])
                 );
-                // 背景星尘
-                const bgDust = orbitRadii.flatMap((r, oi) => {
-                  const count = 8 + oi * 5;
-                  return Array.from({ length: count }, (_, di) => ({
-                    angle: (di / count) * 360 + di * 7.3,
-                    r, oi, di,
-                    size: 1 + (di % 3) * 0.5,
-                    baseOpacity: 0.08 + (di % 4) * 0.05,
-                  }));
-                });
+                // 密集星尘 - 铺满整个区域（不仅限于轨道）
+                const denseStars: { x: number; y: number; size: number; opacity: number; dur: number }[] = [];
+                for (let i = 0; i < 200; i++) {
+                  // 在整个 900x900 区域随机分布，但中心 80px 内留空
+                  const angle = (i / 200) * Math.PI * 2 + i * 2.39996; // 黄金角
+                  const dist = 60 + Math.sqrt(i / 200) * 390; // 从中心向外渐密
+                  denseStars.push({
+                    x: 450 + Math.cos(angle) * dist,
+                    y: 450 + Math.sin(angle) * dist,
+                    size: 0.8 + (i % 5) * 0.4,
+                    opacity: 0.06 + (i % 7) * 0.03,
+                    dur: 3 + (i % 11) * 0.5,
+                  });
+                }
 
                 return (
                   <div
