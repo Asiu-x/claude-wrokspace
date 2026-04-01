@@ -4,5 +4,18 @@
       "Bash(find '/Users/xccx/Library/Mobile Documents/com~apple~CloudDocs/工作文件/X智库' -name *.md -type f -not -path */.* -exec grep -A5 ^---$ {})",
       "Bash(2)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/xccx/Documents/claude/scripts/auto-snapshot.sh"
+          }
+        ]
+      }
+    ]
   }
 }
