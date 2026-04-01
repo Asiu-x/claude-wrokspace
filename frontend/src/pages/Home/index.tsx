@@ -666,181 +666,264 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* 高校合作案例 - Spotlight Gallery */}
-        <section className="py-28 bg-zinc-50/60 overflow-hidden">
-          <div className="max-w-6xl mx-auto px-4">
-            <motion.div
-              className="text-center mb-20"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-5">高校合作案例</h2>
-              <p className="text-zinc-400 max-w-xl mx-auto text-lg leading-relaxed">
-                与全国高校深度合作，打造标杆AI落地案例
-              </p>
-            </motion.div>
-          </div>
+        {/* 高校合作案例 - 发布会级暗黑画廊 */}
+        {(() => {
+          // 每个案例的主题色配置
+          const caseThemes: Record<number, { accent: string; glow: string; orbColor1: string; orbColor2: string }> = {
+            0: { accent: '#22c55e', glow: 'rgba(34,197,94,0.15)', orbColor1: 'rgba(34,197,94,0.4)', orbColor2: 'rgba(16,185,129,0.2)' },
+            1: { accent: '#ef4444', glow: 'rgba(239,68,68,0.12)', orbColor1: 'rgba(239,68,68,0.35)', orbColor2: 'rgba(220,38,38,0.15)' },
+            2: { accent: '#3b82f6', glow: 'rgba(59,130,246,0.15)', orbColor1: 'rgba(59,130,246,0.4)', orbColor2: 'rgba(99,102,241,0.2)' },
+            3: { accent: '#f59e0b', glow: 'rgba(245,158,11,0.12)', orbColor1: 'rgba(245,158,11,0.35)', orbColor2: 'rgba(217,119,6,0.15)' },
+            4: { accent: '#8b5cf6', glow: 'rgba(139,92,246,0.15)', orbColor1: 'rgba(139,92,246,0.4)', orbColor2: 'rgba(124,58,237,0.2)' },
+            5: { accent: '#06b6d4', glow: 'rgba(6,182,212,0.12)', orbColor1: 'rgba(6,182,212,0.35)', orbColor2: 'rgba(8,145,178,0.15)' },
+          };
+          const currentTheme = caseThemes[spotlightIdx % 6] || caseThemes[0];
+          const currentCase = featuredCases[spotlightIdx];
+          const titleParts = currentCase?.title?.split(/\s+/) || [''];
+          const modelName = titleParts[0];
+          const modelSub = titleParts.slice(1).join(' ');
 
-          {featuredCases.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {/* 景深舞台 */}
-              <div className="relative flex items-center justify-center" style={{ height: 400 }}>
-                {/* 左右渐变遮罩 */}
-                <div className="absolute inset-0 z-20 pointer-events-none" style={{
-                  background: 'linear-gradient(to right, rgb(250 250 250 / 0.9) 0%, transparent 15%, transparent 85%, rgb(250 250 250 / 0.9) 100%)',
-                }} />
+          return (
+            <section className="relative py-0 overflow-hidden bg-[#0A0A0A]">
+              {/* 顶部渐变过渡 */}
+              <div className="h-24 bg-gradient-to-b from-gray-50 to-[#0A0A0A]" />
 
-                {/* 卡片层 */}
-                {featuredCases.map((caseItem, idx) => {
-                  const total = featuredCases.length;
-                  let diff = idx - spotlightIdx;
-                  if (diff > total / 2) diff -= total;
-                  if (diff < -total / 2) diff += total;
-                  const isActive = diff === 0;
-                  const isVisible = Math.abs(diff) <= 2;
+              <div className="relative py-20 px-4">
+                {/* 标题 */}
+                <motion.div
+                  className="text-center mb-16 relative z-10"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-100px' }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-5">高校合作案例</h2>
+                  <p className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed">
+                    与全国高校深度合作，打造标杆AI落地案例
+                  </p>
+                </motion.div>
 
-                  if (!isVisible) return null;
-
-                  // 从标题中提取模型名（取第一个空格前的部分或全部）
-                  const titleParts = caseItem.title.split(/\s+/);
-                  const modelName = titleParts[0];
-                  const subtitle = titleParts.slice(1).join(' ');
-
-                  return (
-                    <motion.div
-                      key={caseItem.id}
-                      className="absolute"
-                      style={{ width: 640, zIndex: 10 - Math.abs(diff) }}
-                      animate={{
-                        x: diff * 440,
-                        scale: isActive ? 1 : 0.82,
-                        opacity: isActive ? 1 : Math.abs(diff) === 1 ? 0.4 : 0.12,
-                      }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    >
-                      {/* 主角卡片背后的氛围光斑 */}
-                      {isActive && (
-                        <div className="absolute -inset-10 -z-10 pointer-events-none">
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-indigo-300/20 blur-[80px]" />
-                        </div>
-                      )}
-
-                      <div
-                        className={`relative w-full aspect-[3/2] rounded-[2rem] overflow-hidden cursor-pointer group border-t-4 border-t-red-800 ${isActive ? 'border-x border-b border-zinc-200/50' : 'border-x border-b border-zinc-100/30'}`}
-                        style={{
-                          background: 'linear-gradient(to bottom, rgb(250 250 249 / 0.5), white)',
-                          boxShadow: isActive
-                            ? '0 20px 50px -12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02)'
-                            : '0 2px 8px rgba(0,0,0,0.02)',
-                        }}
-                        onClick={() => {
-                          if (!isActive) setSpotlightIdx(idx);
-                          else navigate(`/cases/${caseItem.id}`);
-                        }}
+                {featuredCases.length > 0 && currentCase ? (
+                  <div className="max-w-6xl mx-auto relative">
+                    {/* 环境光 - 跟随主题色渐变 */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={`env-${spotlightIdx}`}
+                        className="absolute inset-0 pointer-events-none z-0"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.2 }}
                       >
-                        {/* 非活跃蒙版 */}
-                        {!isActive && (
-                          <div className="absolute inset-0 bg-white/60 z-10" />
-                        )}
+                        <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] opacity-30" style={{ background: currentTheme.orbColor1 }} />
+                        <div className="absolute top-[30%] right-[25%] w-[300px] h-[300px] rounded-full blur-[100px] opacity-20" style={{ background: currentTheme.orbColor2 }} />
+                      </motion.div>
+                    </AnimatePresence>
 
-                        {/* 权威水印 - 超大偏移裁切 */}
-                        <div className="absolute -bottom-16 -right-8 text-[280px] font-black leading-none text-red-900/[0.04] pointer-events-none select-none" style={{ fontFamily: "'Inter', 'PingFang SC', system-ui" }}>
-                          {(caseItem.university || '校')[0]}
-                        </div>
+                    {/* 玻璃态画幅 */}
+                    <div
+                      className="relative z-10 w-full rounded-3xl border border-white/[0.08] overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        minHeight: 440,
+                      }}
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={currentCase.id}
+                          className="flex flex-col md:flex-row h-full"
+                          style={{ minHeight: 440 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {/* 左侧 - 文字排版 40% */}
+                          <div className="md:w-[42%] p-10 md:p-12 flex flex-col justify-between relative z-10">
+                            {/* 顶部背书 */}
+                            <div>
+                              <motion.div
+                                className="mb-8"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                              >
+                                <div className="text-xs text-zinc-500 tracking-[0.2em] uppercase font-medium mb-4">
+                                  AI 能力中心 × {currentCase.university || currentCase.organization}
+                                </div>
+                                {currentCase.universityLevel && (
+                                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md">
+                                    <span className="text-[11px] font-medium text-zinc-300 tracking-wide">
+                                      {currentCase.universityLevel === '985' ? '985 工程' : currentCase.universityLevel === '211' ? '211 工程' : currentCase.universityLevel}
+                                    </span>
+                                  </div>
+                                )}
+                              </motion.div>
 
-                        <div className="relative z-0 h-full p-8 md:p-10 flex flex-col justify-between">
-                          {/* 顶部：联合背书区 */}
-                          <div>
-                            <div className="flex items-center gap-3 mb-4">
-                              {/* AI能力中心 Logo */}
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-                                  <span className="text-white text-[9px] font-black">AI</span>
-                                </div>
-                                <span className="text-[11px] text-zinc-400 font-medium">能力中心</span>
-                              </div>
-                              {/* 联合符号 */}
-                              <span className="text-zinc-300 text-sm font-light">✕</span>
-                              {/* 高校校徽 + 全称 */}
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-full bg-white border border-zinc-100 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
-                                  {caseItem.logoUrl ? (
-                                    <img src={caseItem.logoUrl} alt="" className="w-6 h-6 object-contain" />
-                                  ) : (
-                                    <Building2 className="h-4 w-4 text-zinc-300" />
-                                  )}
-                                </div>
-                                <span className="text-[15px] text-zinc-900 font-extrabold tracking-tight">{caseItem.university || caseItem.organization}</span>
-                              </div>
+                              {/* 超大模型名 */}
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                              >
+                                <h3
+                                  className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tighter leading-[1] mb-4"
+                                  style={{
+                                    background: 'linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                  }}
+                                >
+                                  {modelName}
+                                </h3>
+                                {modelSub && (
+                                  <motion.p
+                                    className="text-lg font-medium text-zinc-500 leading-snug"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.35 }}
+                                  >
+                                    {modelSub}
+                                  </motion.p>
+                                )}
+                              </motion.div>
                             </div>
 
-                            {/* 荣誉徽章 - 实体填充 */}
-                            {caseItem.universityLevel && (
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 shadow-sm">
-                                <Award className="h-3 w-3 text-amber-700" />
-                                <span className="text-[11px] font-bold text-amber-800 tracking-wide">
-                                  {caseItem.universityLevel === '985' ? '国家985工程重点建设高校' : caseItem.universityLevel === '211' ? '国家211工程重点建设高校' : caseItem.universityLevel + ' 重点高校'}
-                                </span>
+                            {/* 底部 */}
+                            <motion.div
+                              className="flex items-center justify-between"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.4, delay: 0.5 }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                                  {currentCase.logoUrl ? (
+                                    <img src={currentCase.logoUrl} alt="" className="w-5 h-5 object-contain brightness-0 invert opacity-60" />
+                                  ) : (
+                                    <Building2 className="h-3.5 w-3.5 text-zinc-500" />
+                                  )}
+                                </div>
+                                <span className="text-sm text-zinc-600 font-medium">{currentCase.university || currentCase.organization}</span>
                               </div>
-                            )}
+                              <button
+                                className="text-[13px] text-zinc-500 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-white/5 hover:text-zinc-300"
+                                onClick={() => navigate(`/cases/${currentCase.id}`)}
+                              >
+                                查看详情 <ArrowRight className="h-3.5 w-3.5" />
+                              </button>
+                            </motion.div>
                           </div>
 
-                          {/* 中下部：模型成果 */}
-                          <div>
-                            <div className="text-[11px] text-zinc-400 font-semibold tracking-widest uppercase mb-2">深度共建成果</div>
-                            <h3 className="text-2xl md:text-3xl font-black tracking-tight leading-snug line-clamp-2 bg-gradient-to-r from-zinc-900 to-red-900 bg-clip-text text-transparent">
-                              {caseItem.title}
-                            </h3>
-                            {caseItem.subjects?.length > 0 && (
-                              <div className="flex items-center gap-2 mt-3">
-                                {caseItem.subjects.map((s, sIdx) => (
-                                  <span key={sIdx} className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 text-zinc-500 font-medium">{s}</span>
-                                ))}
-                              </div>
-                            )}
+                          {/* 右侧 - 视觉灵魂 58% */}
+                          <div className="md:w-[58%] relative flex items-center justify-center overflow-hidden">
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={`visual-${spotlightIdx}`}
+                                className="absolute inset-0 flex items-center justify-center"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.05 }}
+                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                              >
+                                {/* 抽象光环图形 */}
+                                <div className="relative w-[320px] h-[320px]">
+                                  {/* 外环 */}
+                                  <motion.div
+                                    className="absolute inset-0 rounded-full border opacity-20"
+                                    style={{ borderColor: currentTheme.accent }}
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                                  />
+                                  {/* 中环 */}
+                                  <motion.div
+                                    className="absolute inset-8 rounded-full border opacity-15"
+                                    style={{ borderColor: currentTheme.accent }}
+                                    animate={{ rotate: -360 }}
+                                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                                  />
+                                  {/* 内环 */}
+                                  <motion.div
+                                    className="absolute inset-16 rounded-full border opacity-10"
+                                    style={{ borderColor: currentTheme.accent }}
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                                  />
+                                  {/* 核心光球 */}
+                                  <motion.div
+                                    className="absolute inset-[35%] rounded-full"
+                                    style={{ background: `radial-gradient(circle, ${currentTheme.orbColor1}, transparent 70%)` }}
+                                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.8, 0.6] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                  />
+                                  {/* 轨道粒子 */}
+                                  {[0, 1, 2, 3, 4, 5].map((p) => (
+                                    <motion.div
+                                      key={p}
+                                      className="absolute w-1.5 h-1.5 rounded-full"
+                                      style={{
+                                        background: currentTheme.accent,
+                                        top: '50%', left: '50%',
+                                        boxShadow: `0 0 8px ${currentTheme.accent}`,
+                                      }}
+                                      animate={{
+                                        x: [
+                                          Math.cos((p / 6) * Math.PI * 2) * 130,
+                                          Math.cos((p / 6) * Math.PI * 2 + Math.PI) * 130,
+                                          Math.cos((p / 6) * Math.PI * 2) * 130,
+                                        ],
+                                        y: [
+                                          Math.sin((p / 6) * Math.PI * 2) * 130,
+                                          Math.sin((p / 6) * Math.PI * 2 + Math.PI) * 130,
+                                          Math.sin((p / 6) * Math.PI * 2) * 130,
+                                        ],
+                                        opacity: [0.3, 0.8, 0.3],
+                                      }}
+                                      transition={{ duration: 8 + p * 0.5, repeat: Infinity, ease: 'easeInOut', delay: p * 0.3 }}
+                                    />
+                                  ))}
+                                  {/* 中心学科文字 */}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-sm font-medium tracking-widest uppercase" style={{ color: currentTheme.accent, opacity: 0.5 }}>
+                                      {currentCase.subjects?.[0] || ''}
+                                    </span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            </AnimatePresence>
                           </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
 
-                          {/* 底行：幽灵按钮 */}
-                          <div className="flex items-center justify-end">
-                            <span className="text-[13px] font-medium text-zinc-400 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-600">
-                              查看案例详情 <ArrowRight className="h-3.5 w-3.5" />
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                    {/* 导航点 */}
+                    <div className="flex items-center justify-center gap-1.5 mt-10">
+                      {featuredCases.map((_, idx) => (
+                        <button
+                          key={idx}
+                          className={`rounded-full transition-all duration-300 ${
+                            idx === spotlightIdx
+                              ? 'w-6 h-1.5 bg-white/60'
+                              : 'w-1.5 h-1.5 bg-white/15 hover:bg-white/25'
+                          }`}
+                          onClick={() => setSpotlightIdx(idx)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-6xl mx-auto">
+                    <div className="w-full h-[440px] bg-white/5 rounded-3xl animate-pulse" />
+                  </div>
+                )}
               </div>
 
-              {/* 导航点 - 极简缩小 */}
-              <div className="flex items-center justify-center gap-1.5 mt-10">
-                {featuredCases.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`rounded-full transition-all duration-300 ${
-                      idx === spotlightIdx
-                        ? 'w-5 h-1.5 bg-zinc-900'
-                        : 'w-1.5 h-1.5 bg-zinc-300 hover:bg-zinc-400'
-                    }`}
-                    onClick={() => setSpotlightIdx(idx)}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="w-[640px] aspect-[3/2] bg-zinc-100 rounded-[2rem] animate-pulse" />
-            </div>
-          )}
-        </section>
+              {/* 底部渐变过渡 */}
+              <div className="h-24 bg-gradient-to-b from-[#0A0A0A] to-zinc-50" />
+            </section>
+          );
+        })()}
 
         {/* 模型网状展示 */}
         <section className="py-28 px-4 bg-zinc-50/50">
