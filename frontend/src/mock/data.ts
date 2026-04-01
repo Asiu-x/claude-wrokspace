@@ -370,7 +370,8 @@ export const generateMockCase = (index: number = 0): CaseItem => {
     university: CASE_UNIVERSITIES[index % CASE_UNIVERSITIES.length],
     universityLevel: CASE_UNIVERSITY_LEVELS[index % CASE_UNIVERSITY_LEVELS.length],
     cooperationType: CASE_COOPERATION_TYPES[index % CASE_COOPERATION_TYPES.length],
-    outcomes: CASE_OUTCOMES[index % CASE_OUTCOMES.length]
+    outcomes: CASE_OUTCOMES[index % CASE_OUTCOMES.length],
+    logoUrl: CASE_LOGO_URLS[index % CASE_LOGO_URLS.length],
   };
 };
 
