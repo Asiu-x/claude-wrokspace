@@ -36,6 +36,15 @@
   }
 }
 
+/* ========== Blueprint Grid ========== */
+
+.bg-grid-zinc {
+  background-image:
+    linear-gradient(to right, rgb(228 228 231 / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(228 228 231 / 0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
 /* ========== Infinite Marquee ========== */
 
 .marquee-track {
