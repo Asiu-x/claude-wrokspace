@@ -36,6 +36,28 @@
   }
 }
 
+/* ========== Infinite Marquee ========== */
+
+.marquee-track {
+  overflow: hidden;
+  width: 100%;
+}
+
+.marquee-inner {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 40s linear infinite;
+}
+
+.marquee-track:hover .marquee-inner {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ========== Hero 区 - 白色背景 + 粒子 ========== */
 
 /* 渐变文字 - 浅色主题 */
