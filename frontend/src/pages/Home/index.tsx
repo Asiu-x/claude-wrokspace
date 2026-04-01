@@ -971,19 +971,39 @@ const Home: React.FC = () => {
                     style={{ width: '100%', maxWidth: 1100, aspectRatio: '1/1' }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
-                    {/* SVG 底层：星尘 + 轨道 */}
-                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 1200">
+                    {/* SVG：星尘 + 同心圆轨道 + 辐射连线 */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${VB} ${VB}`}>
+                      {/* 星尘 */}
                       {bgStars.map((s, i) => (
                         <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
                       ))}
-                      {orbitConfig.map((o, i) => (
-                        <circle key={`orb-${i}`} cx="600" cy="600" r={o.r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
+                      {/* 同心圆虚线轨道 */}
+                      {orbits.map((r, i) => (
+                        <circle key={`orb-${i}`} cx={C} cy={C} r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
                       ))}
+                      {/* 中心到每个节点的辐射连线 */}
+                      {allNodes.map((n, i) => (
+                        <line key={`ray-${i}`} x1={C} y1={C} x2={n.x} y2={n.y}
+                          stroke={hoveredModel === n.flatIdx ? '#6366f1' : '#e4e4e7'}
+                          strokeWidth={hoveredModel === n.flatIdx ? 1.5 : 0.5}
+                          opacity={hoveredModel === n.flatIdx ? 0.6 : 0.2}
+                          style={{ transition: 'all 0.3s ease' }}
+                        />
+                      ))}
+                      {/* 中心脉冲 */}
                       {[0, 1, 2].map(ring => (
-                        <circle key={`p-${ring}`} cx="600" cy="600" fill="none" stroke="#6366f1" strokeWidth={1}>
+                        <circle key={`p-${ring}`} cx={C} cy={C} fill="none" stroke="#6366f1" strokeWidth={1}>
                           <animate attributeName="r" values={`${30 + ring * 8};${70 + ring * 20}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                           <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
+                      ))}
+                      {/* 节点圆点 */}
+                      {allNodes.map((n, i) => (
+                        <circle key={`dot-${i}`} cx={n.x} cy={n.y}
+                          r={hoveredModel === n.flatIdx ? n.dotSize / 2 * 1.8 : n.dotSize / 2}
+                          fill={hoveredModel === n.flatIdx ? '#6366f1' : 'rgba(99,102,241,0.6)'}
+                          style={{ transition: 'all 0.3s ease' }}
+                        />
                       ))}
                     </svg>
 
