@@ -666,264 +666,218 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* 高校合作案例 - 发布会级暗黑画廊 */}
-        {(() => {
-          // 每个案例的主题色配置
-          const caseThemes: Record<number, { accent: string; glow: string; orbColor1: string; orbColor2: string }> = {
-            0: { accent: '#22c55e', glow: 'rgba(34,197,94,0.15)', orbColor1: 'rgba(34,197,94,0.4)', orbColor2: 'rgba(16,185,129,0.2)' },
-            1: { accent: '#ef4444', glow: 'rgba(239,68,68,0.12)', orbColor1: 'rgba(239,68,68,0.35)', orbColor2: 'rgba(220,38,38,0.15)' },
-            2: { accent: '#3b82f6', glow: 'rgba(59,130,246,0.15)', orbColor1: 'rgba(59,130,246,0.4)', orbColor2: 'rgba(99,102,241,0.2)' },
-            3: { accent: '#f59e0b', glow: 'rgba(245,158,11,0.12)', orbColor1: 'rgba(245,158,11,0.35)', orbColor2: 'rgba(217,119,6,0.15)' },
-            4: { accent: '#8b5cf6', glow: 'rgba(139,92,246,0.15)', orbColor1: 'rgba(139,92,246,0.4)', orbColor2: 'rgba(124,58,237,0.2)' },
-            5: { accent: '#06b6d4', glow: 'rgba(6,182,212,0.12)', orbColor1: 'rgba(6,182,212,0.35)', orbColor2: 'rgba(8,145,178,0.15)' },
-          };
-          const currentTheme = caseThemes[spotlightIdx % 6] || caseThemes[0];
-          const currentCase = featuredCases[spotlightIdx];
-          const titleParts = currentCase?.title?.split(/\s+/) || [''];
-          const modelName = titleParts[0];
-          const modelSub = titleParts.slice(1).join(' ');
+        {/* 高校合作案例 - 交互式折叠风琴 */}
+        <section className="py-28 px-4 bg-[#FCFCFC]">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              className="text-center mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-5">高校合作案例</h2>
+              <p className="text-zinc-400 max-w-xl mx-auto text-lg leading-relaxed">
+                与全国高校深度合作，打造标杆AI落地案例
+              </p>
+            </motion.div>
 
-          return (
-            <section className="relative py-0 overflow-hidden bg-[#0A0A0A]">
-              {/* 顶部渐变过渡 */}
-              <div className="h-24 bg-gradient-to-b from-gray-50 to-[#0A0A0A]" />
+            {featuredCases.length > 0 ? (
+              <motion.div
+                className="flex gap-2 rounded-3xl overflow-hidden border border-zinc-200/60"
+                style={{ height: 520, boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {featuredCases.slice(0, 4).map((caseItem, idx) => {
+                  const isExpanded = spotlightIdx === idx;
+                  const titleParts = caseItem.title.split(/\s+/);
+                  const modelName = titleParts[0];
+                  const modelSub = titleParts.slice(1).join(' ');
+                  // 硬核数据
+                  const dataPoints = caseItem.outcomes?.slice(0, 2) || [];
 
-              <div className="relative py-20 px-4">
-                {/* 标题 */}
-                <motion.div
-                  className="text-center mb-16 relative z-10"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-100px' }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-5">高校合作案例</h2>
-                  <p className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed">
-                    与全国高校深度合作，打造标杆AI落地案例
-                  </p>
-                </motion.div>
-
-                {featuredCases.length > 0 && currentCase ? (
-                  <div className="max-w-6xl mx-auto relative">
-                    {/* 环境光 - 跟随主题色渐变 */}
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={`env-${spotlightIdx}`}
-                        className="absolute inset-0 pointer-events-none z-0"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.2 }}
-                      >
-                        <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] opacity-30" style={{ background: currentTheme.orbColor1 }} />
-                        <div className="absolute top-[30%] right-[25%] w-[300px] h-[300px] rounded-full blur-[100px] opacity-20" style={{ background: currentTheme.orbColor2 }} />
-                      </motion.div>
-                    </AnimatePresence>
-
-                    {/* 玻璃态画幅 */}
-                    <div
-                      className="relative z-10 w-full rounded-3xl border border-white/[0.08] overflow-hidden"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
-                        backdropFilter: 'blur(20px)',
-                        minHeight: 440,
-                      }}
+                  return (
+                    <motion.div
+                      key={caseItem.id}
+                      className={`relative cursor-pointer overflow-hidden transition-colors duration-500 ${isExpanded ? 'bg-white' : 'bg-zinc-50 hover:bg-zinc-100/70'}`}
+                      animate={{ flex: isExpanded ? 5 : 1 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 26 }}
+                      onClick={() => setSpotlightIdx(idx)}
+                      style={{ minWidth: 0 }}
                     >
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={currentCase.id}
-                          className="flex flex-col md:flex-row h-full"
-                          style={{ minHeight: 440 }}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          {/* 左侧 - 文字排版 40% */}
-                          <div className="md:w-[42%] p-10 md:p-12 flex flex-col justify-between relative z-10">
-                            {/* 顶部背书 */}
-                            <div>
-                              <motion.div
-                                className="mb-8"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.1 }}
-                              >
-                                <div className="text-xs text-zinc-500 tracking-[0.2em] uppercase font-medium mb-4">
-                                  AI 能力中心 × {currentCase.university || currentCase.organization}
-                                </div>
-                                {currentCase.universityLevel && (
-                                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md">
-                                    <span className="text-[11px] font-medium text-zinc-300 tracking-wide">
-                                      {currentCase.universityLevel === '985' ? '985 工程' : currentCase.universityLevel === '211' ? '211 工程' : currentCase.universityLevel}
-                                    </span>
-                                  </div>
-                                )}
-                              </motion.div>
+                      {/* ===== 收拢态 ===== */}
+                      <AnimatePresence>
+                        {!isExpanded && (
+                          <motion.div
+                            className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                          >
+                            {/* 校徽 */}
+                            <div className="w-12 h-12 rounded-full bg-white border border-zinc-200 flex items-center justify-center shadow-sm overflow-hidden">
+                              {caseItem.logoUrl ? (
+                                <img src={caseItem.logoUrl} alt="" className="w-8 h-8 object-contain" />
+                              ) : (
+                                <Building2 className="h-5 w-5 text-zinc-400" />
+                              )}
+                            </div>
+                            {/* 竖排高校名 */}
+                            <div className="flex flex-col items-center gap-0.5">
+                              {(caseItem.university || '').split('').map((char, cIdx) => (
+                                <span key={cIdx} className="text-[13px] font-bold text-zinc-500 leading-tight">{char}</span>
+                              ))}
+                            </div>
+                            {/* 指示点 */}
+                            <div className="flex flex-col gap-1 mt-2">
+                              {[0,1,2].map(d => (
+                                <div key={d} className="w-1 h-1 rounded-full bg-zinc-300" />
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
-                              {/* 超大模型名 */}
-                              <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                              >
-                                <h3
-                                  className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tighter leading-[1] mb-4"
-                                  style={{
-                                    background: 'linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                  }}
+                      {/* ===== 展开态 ===== */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            className="absolute inset-0 flex"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                          >
+                            {/* 左侧：文字排版 */}
+                            <div className="w-1/2 p-8 md:p-10 flex flex-col justify-between relative z-10">
+                              <div>
+                                {/* 联合背书 */}
+                                <motion.div
+                                  className="mb-6"
+                                  initial={{ opacity: 0, y: 12 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.4, delay: 0.15 }}
                                 >
-                                  {modelName}
-                                </h3>
-                                {modelSub && (
-                                  <motion.p
-                                    className="text-lg font-medium text-zinc-500 leading-snug"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.35 }}
-                                  >
-                                    {modelSub}
-                                  </motion.p>
-                                )}
+                                  <div className="text-[11px] text-zinc-400 tracking-[0.15em] uppercase font-medium mb-3">
+                                    AI 能力中心 × {caseItem.university || caseItem.organization}
+                                  </div>
+                                  {caseItem.universityLevel && (
+                                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500 font-bold tracking-wide">
+                                      {caseItem.universityLevel} 工程
+                                    </span>
+                                  )}
+                                </motion.div>
+
+                                {/* 模型名 */}
+                                <motion.div
+                                  initial={{ opacity: 0, y: 16 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                                >
+                                  <h3 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 leading-tight mb-2">
+                                    {modelName}
+                                  </h3>
+                                  {modelSub && (
+                                    <p className="text-base text-zinc-400 font-medium leading-snug">{modelSub}</p>
+                                  )}
+                                </motion.div>
+                              </div>
+
+                              {/* 底部 */}
+                              <motion.div
+                                className="flex items-center gap-3"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3, delay: 0.4 }}
+                              >
+                                <div className="w-8 h-8 rounded-full bg-zinc-50 border border-zinc-100 flex items-center justify-center overflow-hidden">
+                                  {caseItem.logoUrl ? (
+                                    <img src={caseItem.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                                  ) : (
+                                    <Building2 className="h-3.5 w-3.5 text-zinc-400" />
+                                  )}
+                                </div>
+                                <span className="text-sm text-zinc-400 font-medium">{caseItem.university}</span>
+                                <button
+                                  className="ml-auto text-[13px] text-zinc-400 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-zinc-50 hover:text-zinc-600 transition-colors"
+                                  onClick={(e) => { e.stopPropagation(); navigate(`/cases/${caseItem.id}`); }}
+                                >
+                                  查看详情 <ArrowRight className="h-3.5 w-3.5" />
+                                </button>
                               </motion.div>
                             </div>
 
-                            {/* 底部 */}
-                            <motion.div
-                              className="flex items-center justify-between"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.4, delay: 0.5 }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-                                  {currentCase.logoUrl ? (
-                                    <img src={currentCase.logoUrl} alt="" className="w-5 h-5 object-contain brightness-0 invert opacity-60" />
-                                  ) : (
-                                    <Building2 className="h-3.5 w-3.5 text-zinc-500" />
-                                  )}
-                                </div>
-                                <span className="text-sm text-zinc-600 font-medium">{currentCase.university || currentCase.organization}</span>
+                            {/* 右侧：数据与内容 */}
+                            <div className="w-1/2 relative flex flex-col justify-center p-8 md:p-10 overflow-hidden">
+                              {/* 背景水印 - 高校首字 */}
+                              <div className="absolute -bottom-10 -right-6 text-[220px] font-black text-zinc-900/[0.025] leading-none pointer-events-none select-none" style={{ fontFamily: "'Inter', system-ui" }}>
+                                {(caseItem.university || '校')[0]}
                               </div>
-                              <button
-                                className="text-[13px] text-zinc-500 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-white/5 hover:text-zinc-300"
-                                onClick={() => navigate(`/cases/${currentCase.id}`)}
-                              >
-                                查看详情 <ArrowRight className="h-3.5 w-3.5" />
-                              </button>
-                            </motion.div>
-                          </div>
 
-                          {/* 右侧 - 视觉灵魂 58% */}
-                          <div className="md:w-[58%] relative flex items-center justify-center overflow-hidden">
-                            <AnimatePresence mode="wait">
+                              {/* 硬核数据 */}
                               <motion.div
-                                key={`visual-${spotlightIdx}`}
-                                className="absolute inset-0 flex items-center justify-center"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                className="relative z-10 space-y-5"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.5, delay: 0.3 }}
                               >
-                                {/* 抽象光环图形 */}
-                                <div className="relative w-[320px] h-[320px]">
-                                  {/* 外环 */}
-                                  <motion.div
-                                    className="absolute inset-0 rounded-full border opacity-20"
-                                    style={{ borderColor: currentTheme.accent }}
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                                  />
-                                  {/* 中环 */}
-                                  <motion.div
-                                    className="absolute inset-8 rounded-full border opacity-15"
-                                    style={{ borderColor: currentTheme.accent }}
-                                    animate={{ rotate: -360 }}
-                                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                                  />
-                                  {/* 内环 */}
-                                  <motion.div
-                                    className="absolute inset-16 rounded-full border opacity-10"
-                                    style={{ borderColor: currentTheme.accent }}
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-                                  />
-                                  {/* 核心光球 */}
-                                  <motion.div
-                                    className="absolute inset-[35%] rounded-full"
-                                    style={{ background: `radial-gradient(circle, ${currentTheme.orbColor1}, transparent 70%)` }}
-                                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.8, 0.6] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                  />
-                                  {/* 轨道粒子 */}
-                                  {[0, 1, 2, 3, 4, 5].map((p) => (
-                                    <motion.div
-                                      key={p}
-                                      className="absolute w-1.5 h-1.5 rounded-full"
-                                      style={{
-                                        background: currentTheme.accent,
-                                        top: '50%', left: '50%',
-                                        boxShadow: `0 0 8px ${currentTheme.accent}`,
-                                      }}
-                                      animate={{
-                                        x: [
-                                          Math.cos((p / 6) * Math.PI * 2) * 130,
-                                          Math.cos((p / 6) * Math.PI * 2 + Math.PI) * 130,
-                                          Math.cos((p / 6) * Math.PI * 2) * 130,
-                                        ],
-                                        y: [
-                                          Math.sin((p / 6) * Math.PI * 2) * 130,
-                                          Math.sin((p / 6) * Math.PI * 2 + Math.PI) * 130,
-                                          Math.sin((p / 6) * Math.PI * 2) * 130,
-                                        ],
-                                        opacity: [0.3, 0.8, 0.3],
-                                      }}
-                                      transition={{ duration: 8 + p * 0.5, repeat: Infinity, ease: 'easeInOut', delay: p * 0.3 }}
-                                    />
+                                {/* 学科标签 */}
+                                <div className="flex flex-wrap gap-2">
+                                  {caseItem.subjects?.map((s, sIdx) => (
+                                    <span key={sIdx} className="text-[11px] px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-500 font-semibold">{s}</span>
                                   ))}
-                                  {/* 中心学科文字 */}
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-sm font-medium tracking-widest uppercase" style={{ color: currentTheme.accent, opacity: 0.5 }}>
-                                      {currentCase.subjects?.[0] || ''}
-                                    </span>
-                                  </div>
                                 </div>
+
+                                {/* 数据成果 */}
+                                {dataPoints.map((point, pIdx) => (
+                                  <motion.div
+                                    key={pIdx}
+                                    className="flex items-start gap-3"
+                                    initial={{ opacity: 0, x: 15 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4, delay: 0.35 + pIdx * 0.08 }}
+                                  >
+                                    <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                      <Award className="h-3 w-3 text-emerald-500" />
+                                    </div>
+                                    <p className="text-sm text-zinc-600 leading-relaxed font-medium">{point}</p>
+                                  </motion.div>
+                                ))}
+
+                                {/* 合作模式 */}
+                                {caseItem.cooperationType && (
+                                  <motion.div
+                                    className="pt-3 border-t border-zinc-100 flex items-center gap-2"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.5 }}
+                                  >
+                                    <Users className="h-3.5 w-3.5 text-zinc-400" />
+                                    <span className="text-xs text-zinc-400 font-medium">{caseItem.cooperationType}</span>
+                                  </motion.div>
+                                )}
                               </motion.div>
-                            </AnimatePresence>
-                          </div>
-                        </motion.div>
+                            </div>
+                          </motion.div>
+                        )}
                       </AnimatePresence>
-                    </div>
-
-                    {/* 导航点 */}
-                    <div className="flex items-center justify-center gap-1.5 mt-10">
-                      {featuredCases.map((_, idx) => (
-                        <button
-                          key={idx}
-                          className={`rounded-full transition-all duration-300 ${
-                            idx === spotlightIdx
-                              ? 'w-6 h-1.5 bg-white/60'
-                              : 'w-1.5 h-1.5 bg-white/15 hover:bg-white/25'
-                          }`}
-                          onClick={() => setSpotlightIdx(idx)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="max-w-6xl mx-auto">
-                    <div className="w-full h-[440px] bg-white/5 rounded-3xl animate-pulse" />
-                  </div>
-                )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            ) : (
+              <div className="flex gap-2 h-[520px] rounded-3xl overflow-hidden">
+                {[0,1,2,3].map(i => (
+                  <div key={i} className={`bg-zinc-50 animate-pulse ${i === 0 ? 'flex-[5]' : 'flex-1'}`} />
+                ))}
               </div>
-
-              {/* 底部渐变过渡 */}
-              <div className="h-24 bg-gradient-to-b from-[#0A0A0A] to-zinc-50" />
-            </section>
-          );
-        })()}
+            )}
+          </div>
+        </section>
 
         {/* 模型网状展示 */}
         <section className="py-28 px-4 bg-zinc-50/50">
