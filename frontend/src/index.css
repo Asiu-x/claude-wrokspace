@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  body {
+    font-family: PingFang SC, Hiragino Sans GB, Microsoft YaHei, ui-sans-serif, system-ui, sans-serif;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ========== Hero 区 - 白色背景 + 粒子 ========== */
+
+/* 渐变文字 - 浅色主题 */
+.hero-gradient-text-light {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 35%, #a855f7 65%, #6366f1 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 主按钮 - 呼吸阴影 */
+.hero-btn-glow {
+  background: #4f46e5;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.hero-btn-glow:hover {
+  background: #4338ca;
+  box-shadow: 0 8px 40px rgba(79, 70, 229, 0.45);
+  animation: none;
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25); }
+  50% { box-shadow: 0 4px 32px rgba(79, 70, 229, 0.4); }
+}
+
+/* 次按钮 - 拟态风格 */
+.hero-btn-ghost {
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.06), -1px -1px 4px rgba(255, 255, 255, 0.8);
+}
+
+.hero-btn-ghost:hover {
+  background: #e5e7eb;
+  color: #111827;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.08), -1px -1px 3px rgba(255, 255, 255, 0.9);
+}
+
+
+/* 3D Flip Card Styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

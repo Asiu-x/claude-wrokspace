@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-MEM 智能记忆系统 — 交互式课程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-bg-code: #1E1E2E;
+  --color-text: #2C2A28;
+  --color-text-secondary: #6B6560;
+  --color-text-muted: #9E9790;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FDF9F3;
+  --color-accent: #2A7B9B;
+  --color-accent-hover: #1F6680;
+  --color-accent-light: #E4F2F7;
+  --color-accent-muted: #5BA3BD;
+  --color-success: #2D8B55;
+  --color-success-light: #E8F5EE;
+  --color-error: #C93B3B;
+  --color-error-light: #FDE8E8;
+  --color-info: #2A7B9B;
+  --color-info-light: #E4F2F7;
+  --color-actor-1: #2A7B9B;
+  --color-actor-2: #D94F30;
+  --color-actor-3: #7B6DAA;
+  --color-actor-4: #D4A843;
+  --color-actor-5: #2D8B55;
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --leading-loose: 1.8;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --content-width: 800px;
+  --content-width-wide: 1000px;
+  --nav-height: 50px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(44,42,40,0.05);
+  --shadow-md: 0 4px 12px rgba(44,42,40,0.08);
+  --shadow-lg: 0 8px 24px rgba(44,42,40,0.1);
+  --shadow-xl: 0 16px 48px rgba(44,42,40,0.12);
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out: cubic-bezier(0.65,0,0.35,1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --stagger-delay: 120ms;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(42,123,155,0.03) 0%, transparent 50%);
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+
+/* ===== NAVIGATION ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(250,247,242,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.progress-bar {
+  position: absolute; top: 0; left: 0; height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-muted));
+  transition: width 100ms linear;
+}
+.nav-inner {
+  max-width: var(--content-width-wide); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--space-6); height: var(--nav-height);
+}
+.nav-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--text-sm); color: var(--color-text);
+}
+.nav-dots { display: flex; gap: var(--space-3); }
+.nav-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--color-text-muted); background: transparent;
+  cursor: pointer; transition: all var(--duration-normal) var(--ease-out);
+  position: relative;
+}
+.nav-dot:hover { border-color: var(--color-accent); }
+.nav-dot.active { border-color: var(--color-accent); background: var(--color-accent); box-shadow: 0 0 8px rgba(42,123,155,0.4); }
+.nav-dot.visited { border-color: var(--color-accent); background: var(--color-accent); }
+.nav-dot[data-tooltip]:hover::after {
+  content: attr(data-tooltip); position: fixed;
+  background: var(--color-text); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: var(--text-xs); white-space: nowrap;
+  transform: translateX(-50%); pointer-events: none;
+}
+
+/* ===== MODULE LAYOUT ===== */
+.module {
+  min-height: 100dvh; min-height: 100vh;
+  scroll-snap-align: start;
+  padding: var(--space-16) var(--space-6);
+  padding-top: calc(var(--nav-height) + var(--space-12));
+}
+.module-content { max-width: var(--content-width); margin: 0 auto; }
+.module-header { margin-bottom: var(--space-12); }
+.module-number {
+  font-family: var(--font-display); font-size: var(--text-6xl);
+  font-weight: 800; color: var(--color-accent); opacity: 0.15;
+  line-height: var(--leading-tight);
+}
+.module-title {
+  font-family: var(--font-display); font-size: var(--text-4xl);
+  font-weight: 700; line-height: var(--leading-tight);
+  margin-top: var(--space-2);
+}
+.module-subtitle {
+  font-size: var(--text-lg); color: var(--color-text-secondary);
+  margin-top: var(--space-3); line-height: var(--leading-snug);
+}
+.screen { margin-bottom: var(--space-16); }
+.screen-heading {
+  font-family: var(--font-display); font-size: var(--text-2xl);
+  font-weight: 600; margin-bottom: var(--space-6);
+}
+.screen p, .screen li {
+  font-size: var(--text-lg); line-height: var(--leading-normal);
+  margin-bottom: var(--space-4); color: var(--color-text-secondary);
+}
+
+/* ===== ANIMATIONS ===== */
+.animate-in {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+.animate-in.visible { opacity: 1; transform: translateY(0); }
+.stagger-children > .animate-in {
+  transition-delay: calc(var(--stagger-index, 0) * var(--stagger-delay));
+}
+
+/* ===== CODE BLOCKS ===== */
+pre, code {
+  white-space: pre-wrap; word-break: break-word; overflow-x: hidden;
+}
+.code-keyword { color: #CBA6F7; }
+.code-string { color: #A6E3A1; }
+.code-function { color: #89B4FA; }
+.code-comment { color: #6C7086; }
+.code-number { color: #FAB387; }
+.code-property { color: #F9E2AF; }
+.code-operator { color: #94E2D5; }
+.code-tag { color: #F38BA8; }
+.code-attr { color: #F9E2AF; }
+.code-value { color: #A6E3A1; }
+
+/* ===== TRANSLATION BLOCKS ===== */
+.translation-block {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border-radius: var(--radius-md); overflow: hidden;
+  box-shadow: var(--shadow-lg); margin: var(--space-8) 0;
+}
+.translation-code {
+  background: var(--color-bg-code); padding: var(--space-6);
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  color: #CDD6F4; line-height: 1.7; overflow: hidden;
+}
+.translation-code::-webkit-scrollbar, pre::-webkit-scrollbar { display: none; }
+.translation-english {
+  background: var(--color-surface); padding: var(--space-6);
+  border-left: 3px solid var(--color-accent-light);
+}
+.translation-english .line-explain {
+  padding: var(--space-2) 0; font-size: var(--text-sm);
+  color: var(--color-text-secondary); line-height: 1.7;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.translation-english .line-explain:last-child { border-bottom: none; }
+.translation-label {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding: var(--space-2) var(--space-6); font-weight: 600;
+}
+.translation-label-code { background: #181825; color: #6C7086; }
+.translation-label-english { background: var(--color-border-light); color: var(--color-text-muted); }
+
+/* ===== GLOSSARY TOOLTIPS ===== */
+.glossary-term {
+  border-bottom: 1.5px dashed var(--color-accent-muted);
+  cursor: pointer; position: relative;
+}
+.tooltip-popup {
+  position: fixed; z-index: 9999;
+  background: var(--color-text); color: white;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm); line-height: var(--leading-normal);
+  max-width: 320px; box-shadow: var(--shadow-xl);
+  pointer-events: none; opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.tooltip-popup.show { opacity: 1; }
+
+/* ===== CARDS ===== */
+.pattern-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+.pattern-card {
+  background: var(--color-surface); border-radius: var(--radius-md);
+  padding: var(--space-6); box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
+}
+.pattern-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.pattern-card-icon { font-size: 1.5rem; margin-bottom: var(--space-3); }
+.pattern-card-title {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--text-base); margin-bottom: var(--space-2);
+}
+.pattern-card-desc { font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-normal); }
+
+/* ===== CALLOUT BOXES ===== */
+.callout {
+  border-radius: var(--radius-md); padding: var(--space-6);
+  margin: var(--space-8) 0; display: flex; gap: var(--space-4);
+  align-items: flex-start;
+}
+.callout-aha { background: var(--color-accent-light); border-left: 4px solid var(--color-accent); }
+.callout-warn { background: #FFF8E1; border-left: 4px solid var(--color-actor-4); }
+.callout-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.callout-content { flex: 1; }
+.callout-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--text-base); margin-bottom: var(--space-2);
+}
+.callout-text { font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-normal); }
+
+/* ===== GROUP CHAT ===== */
+.group-chat {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-6); box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0; max-width: 500px; margin-left: auto; margin-right: auto;
+}
+.group-chat-header {
+  text-align: center; font-family: var(--font-display);
+  font-weight: 600; font-size: var(--text-sm);
+  color: var(--color-text-muted); margin-bottom: var(--space-6);
+  padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border-light);
+}
+.chat-message {
+  display: flex; gap: var(--space-3); margin-bottom: var(--space-4);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+.chat-message.show { opacity: 1; transform: translateY(0); }
+.chat-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-xs); color: white; font-weight: 700;
+  flex-shrink: 0;
+}
+.chat-bubble {
+  padding: var(--space-3) var(--space-4); border-radius: 14px;
+  font-size: var(--text-sm); line-height: var(--leading-normal);
+  max-width: 80%;
+}
+.chat-name {
+  font-size: var(--text-xs); font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* ===== FLOW ANIMATION ===== */
+.flow-container {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-8); box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0; position: relative; overflow: hidden;
+}
+.flow-steps {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--space-2); flex-wrap: wrap;
+}
+.flow-step {
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--space-2); opacity: 0.3;
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+.flow-step.active { opacity: 1; transform: scale(1.05); }
+.flow-step-icon {
+  width: 56px; height: 56px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: white;
+}
+.flow-step-label {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  color: var(--color-text-secondary); text-align: center; max-width: 80px;
+}
+.flow-arrow {
+  font-size: 1.2rem; color: var(--color-text-muted); flex-shrink: 0;
+  opacity: 0.3; transition: opacity 0.5s var(--ease-out);
+}
+.flow-arrow.active { opacity: 1; color: var(--color-accent); }
+.flow-desc {
+  text-align: center; margin-top: var(--space-6);
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+  min-height: 40px; transition: opacity 0.3s;
+}
+.flow-controls {
+  display: flex; justify-content: center; gap: var(--space-3); margin-top: var(--space-6);
+}
+.flow-btn {
+  padding: var(--space-2) var(--space-5); border-radius: var(--radius-full);
+  border: 2px solid var(--color-accent); background: transparent;
+  color: var(--color-accent); font-family: var(--font-body);
+  font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+.flow-btn:hover { background: var(--color-accent); color: white; }
+.flow-btn.primary { background: var(--color-accent); color: white; }
+.flow-btn.primary:hover { background: var(--color-accent-hover); }
+
+/* ===== QUIZ ===== */
+.quiz-container {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-8); box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0;
+}
+.quiz-question {
+  font-family: var(--font-display); font-size: var(--text-xl);
+  font-weight: 600; margin-bottom: var(--space-6);
+}
+.quiz-scenario {
+  background: var(--color-bg-warm); border-radius: var(--radius-sm);
+  padding: var(--space-4); margin-bottom: var(--space-6);
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+  line-height: var(--leading-normal); border-left: 3px solid var(--color-accent);
+}
+.quiz-options { display: flex; flex-direction: column; gap: var(--space-3); }
+.quiz-option {
+  padding: var(--space-4) var(--space-5); border-radius: var(--radius-md);
+  border: 2px solid var(--color-border); background: var(--color-surface);
+  cursor: pointer; font-size: var(--text-base);
+  transition: all var(--duration-normal) var(--ease-out);
+  text-align: left; font-family: var(--font-body);
+}
+.quiz-option:hover { border-color: var(--color-accent); background: var(--color-accent-light); }
+.quiz-option.correct {
+  border-color: var(--color-success); background: var(--color-success-light);
+  pointer-events: none;
+}
+.quiz-option.incorrect {
+  border-color: var(--color-error); background: var(--color-error-light);
+  pointer-events: none;
+}
+.quiz-option.disabled { pointer-events: none; opacity: 0.5; }
+.quiz-feedback {
+  margin-top: var(--space-4); padding: var(--space-4);
+  border-radius: var(--radius-sm); font-size: var(--text-sm);
+  line-height: var(--leading-normal); display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct-feedback { background: var(--color-success-light); color: #1a5e38; }
+.quiz-feedback.incorrect-feedback { background: var(--color-error-light); color: #8b2020; }
+.quiz-progress {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  color: var(--color-text-muted); margin-bottom: var(--space-4);
+}
+.quiz-next-btn {
+  margin-top: var(--space-4); padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full); border: none;
+  background: var(--color-accent); color: white;
+  font-family: var(--font-body); font-weight: 600;
+  cursor: pointer; display: none;
+}
+.quiz-next-btn.show { display: inline-block; }
+
+/* ===== FILE TREE ===== */
+.file-tree {
+  background: var(--color-bg-code); border-radius: var(--radius-md);
+  padding: var(--space-6); font-family: var(--font-mono);
+  font-size: var(--text-sm); color: #CDD6F4;
+  margin: var(--space-6) 0;
+}
+.file-tree-item { padding: var(--space-1) 0; display: flex; align-items: center; gap: var(--space-2); }
+.file-tree-item.indent-1 { padding-left: var(--space-6); }
+.file-tree-item.indent-2 { padding-left: calc(var(--space-6) * 2); }
+.file-tree-icon { opacity: 0.6; }
+.file-tree-name { color: #89B4FA; }
+.file-tree-desc { color: #6C7086; font-size: var(--text-xs); margin-left: var(--space-2); }
+
+/* ===== STEP CARDS ===== */
+.step-cards { display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-6) 0; }
+.step-card {
+  display: flex; gap: var(--space-4); align-items: flex-start;
+  background: var(--color-surface); border-radius: var(--radius-md);
+  padding: var(--space-5); box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+}
+.step-number {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--color-accent); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--text-sm); flex-shrink: 0;
+}
+.step-content { flex: 1; }
+.step-title { font-family: var(--font-display); font-weight: 600; margin-bottom: var(--space-1); }
+.step-desc { font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-normal); }
+
+/* ===== BADGES ===== */
+.badge-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0; }
+.badge {
+  padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  font-weight: 500; letter-spacing: 0.02em;
+}
+.badge-accent { background: var(--color-accent-light); color: var(--color-accent); }
+.badge-success { background: var(--color-success-light); color: var(--color-success); }
+.badge-warn { background: #FFF8E1; color: #B8860B; }
+.badge-purple { background: #F0ECF9; color: var(--color-actor-3); }
+
+/* ===== HERO SECTION ===== */
+.hero-visual {
+  text-align: center; margin: var(--space-12) 0;
+  padding: var(--space-12) var(--space-6);
+  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-surface) 100%);
+  border-radius: var(--radius-lg);
+}
+.hero-emoji { font-size: 4rem; margin-bottom: var(--space-4); }
+.hero-tagline {
+  font-family: var(--font-display); font-size: var(--text-3xl);
+  font-weight: 700; line-height: var(--leading-tight);
+}
+.hero-sub {
+  font-size: var(--text-lg); color: var(--color-text-secondary);
+  margin-top: var(--space-3); max-width: 500px; margin-left: auto; margin-right: auto;
+}
+
+/* ===== ICON ROW ===== */
+.icon-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-4); margin: var(--space-6) 0;
+}
+.icon-item {
+  text-align: center; padding: var(--space-5);
+  background: var(--color-surface); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.icon-item-emoji { font-size: 2rem; margin-bottom: var(--space-2); }
+.icon-item-label {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--text-sm);
+}
+.icon-item-desc { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1); }
+
+/* ===== ARCHITECTURE DIAGRAM ===== */
+.arch-diagram {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-8); box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0; text-align: center;
+}
+.arch-layer {
+  padding: var(--space-4) var(--space-6); border-radius: var(--radius-md);
+  margin: var(--space-3) auto; max-width: 400px;
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--text-sm); position: relative;
+}
+.arch-arrow {
+  text-align: center; color: var(--color-text-muted);
+  font-size: var(--text-lg); margin: var(--space-1) 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  :root { --text-4xl: 1.875rem; --text-5xl: 2.25rem; --text-6xl: 3rem; }
+  .translation-block { grid-template-columns: 1fr; }
+  .pattern-cards { grid-template-columns: 1fr 1fr; }
+  .flow-steps { gap: var(--space-1); }
+}
+@media (max-width: 480px) {
+  :root { --text-4xl: 1.5rem; --text-5xl: 1.875rem; --text-6xl: 2.25rem; }
+  .module { padding: var(--space-8) var(--space-4); }
+  .pattern-cards { grid-template-columns: 1fr; }
+  .flow-steps { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav">
+  <div class="progress-bar" id="progressBar" role="progressbar" aria-valuenow="0"></div>
+  <div class="nav-inner">
+    <span class="nav-title">A-MEM 智能记忆系统</span>
+    <div class="nav-dots">
+      <button class="nav-dot active" data-target="module-0" data-tooltip="欢迎" role="tab" aria-label="Module 0"></button>
+      <button class="nav-dot" data-target="module-1" data-tooltip="角色介绍" role="tab" aria-label="Module 1"></button>
+      <button class="nav-dot" data-target="module-2" data-tooltip="数据流动" role="tab" aria-label="Module 2"></button>
+      <button class="nav-dot" data-target="module-3" data-tooltip="外部世界" role="tab" aria-label="Module 3"></button>
+      <button class="nav-dot" data-target="module-4" data-tooltip="巧妙设计" role="tab" aria-label="Module 4"></button>
+      <button class="nav-dot" data-target="module-5" data-tooltip="全景架构" role="tab" aria-label="Module 5"></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MODULE 00: WELCOME ===== -->
+<section class="module" id="module-0" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">00</span>
+      <h1 class="module-title">AI 也需要「记忆力」</h1>
+      <p class="module-subtitle">A-MEM 是什么？它为什么重要？以及——你看完这门课能获得什么</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: Hero -->
+      <section class="screen animate-in">
+        <div class="hero-visual">
+          <div class="hero-emoji">🧠</div>
+          <div class="hero-tagline">给 AI 装上长期记忆</div>
+          <div class="hero-sub">A-MEM 是一套开源系统，让 AI 助手像人类一样积累、整理、回忆知识——不再"金鱼脑"</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">问题：AI 的「金鱼记忆」</h2>
+        <p>你跟 AI 聊了半小时，关掉窗口再打开——它忘了一切。每次对话都像初次见面。</p>
+        <div class="icon-row">
+          <div class="icon-item">
+            <div class="icon-item-emoji">💬</div>
+            <div class="icon-item-label">对话结束</div>
+            <div class="icon-item-desc">记忆清零</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">🔄</div>
+            <div class="icon-item-label">重复说明</div>
+            <div class="icon-item-desc">每次重来</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">📎</div>
+            <div class="icon-item-label">无法关联</div>
+            <div class="icon-item-desc">信息孤岛</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">📈</div>
+            <div class="icon-item-label">无法成长</div>
+            <div class="icon-item-desc">原地踏步</div>
+          </div>
+        </div>
+        <p>A-MEM 解决的就是这件事：让 AI 拥有<strong>跨对话的持久记忆</strong>，并且能自动整理、关联、进化这些记忆。</p>
+      </section>
+
+      <!-- Screen 3: Zettelkasten metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">灵感来源：「卡片盒」笔记法</h2>
+        <p>社会学家 Niklas Luhmann 用一个装满卡片的盒子，写出了 70 多本书。他的秘诀不是记住一切，而是——</p>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Zettelkasten（卡片盒）原理</div>
+            <div class="callout-text">每张卡片只记一个想法，但卡片之间用编号<strong>互相引用</strong>。知识的价值不在单张卡片，而在卡片之间的<strong>连接网络</strong>。A-MEM 把这个理念搬进了代码世界。</div>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">📝</div>
+            <div class="pattern-card-title">一张卡片 = 一条记忆</div>
+            <div class="pattern-card-desc">每条记忆有自己的内容、关键词、标签、时间戳，就像一张写满的索引卡</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🔗</div>
+            <div class="pattern-card-title">卡片互相链接</div>
+            <div class="pattern-card-desc">相关的记忆自动建立连接。搜索一条记忆时，它的"邻居"也会一起出现</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🤖</div>
+            <div class="pattern-card-title">AI 自动整理</div>
+            <div class="pattern-card-desc">不需要你手动分类。<span class="glossary-term" data-term="LLM（大语言模型）是像 GPT、Claude 这样的 AI，能理解和生成自然语言文本。对 AI 说'用 LLM 分析'就是让 AI 来理解内容。">LLM</span> 自动提取关键词、判断关联</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">📈</div>
+            <div class="pattern-card-title">记忆会进化</div>
+            <div class="pattern-card-desc">新记忆加入时，系统自动审视已有记忆，更新标签和上下文，让知识网络越来越精准</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: What you'll learn -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">这门课教你什么？</h2>
+        <p>学完这 6 个模块，你将能够——</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">看懂 A-MEM 的每一个零件</div>
+              <div class="step-desc">知道哪个文件做什么，改什么文件会影响什么</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">理解数据怎么流动</div>
+              <div class="step-desc">从"存入一条记忆"到"搜出相关记忆"，追踪完整路径</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">掌握背后的设计思想</div>
+              <div class="step-desc">工厂模式、向量搜索、结构化输出——这些技巧可以用在你自己的项目里</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">有能力把它集成到你的应用</div>
+              <div class="step-desc">给你的 AI 助手、聊天机器人或者自动化工具加上长期记忆</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Module 0 -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-0">
+          <div class="quiz-progress">问题 1/1</div>
+          <div class="quiz-question">假设你在构建一个 AI 客服，用户经常抱怨"每次都要重新解释背景"。A-MEM 最可能在哪个环节解决这个痛点？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="模型训练是让 AI 学会新技能，而不是记住特定用户的历史对话。记忆系统和模型训练是两个不同层面的事。">让 AI 模型重新训练，学会记忆</button>
+            <button class="quiz-option" data-correct="true" data-feedback="没错！A-MEM 在对话之间持久保存用户的上下文信息。下次用户来，AI 先搜索相关记忆，就像翻阅之前的对话笔记一样。这正是'跨对话持久记忆'的价值。">在每次对话开始时，自动搜索该用户的历史记忆并注入上下文</button>
+            <button class="quiz-option" data-correct="false" data-feedback="增加上下文窗口只是让 AI 在单次对话中能记住更多，但关掉窗口后一切仍然消失。A-MEM 解决的是跨对话的持久性问题。">增加 AI 的上下文窗口长度</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 01: MEET THE CHARACTERS ===== -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">四个主角登场</h1>
+      <p class="module-subtitle">A-MEM 的代码里有四个核心"角色"——认识它们，你就掌握了整个系统的骨架</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: File Tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目文件一览</h2>
+        <p>整个项目只有 3 个核心文件，非常精简。就像一出舞台剧，只需要几个角色就能讲好一个故事。</p>
+
+        <div class="file-tree">
+          <div class="file-tree-item">
+            <span class="file-tree-icon">📁</span>
+            <span class="file-tree-name">agentic_memory/</span>
+            <span class="file-tree-desc">— 所有核心代码都在这里</span>
+          </div>
+          <div class="file-tree-item indent-1">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">memory_system.py</span>
+            <span class="file-tree-desc">— 大脑总指挥（728 行）</span>
+          </div>
+          <div class="file-tree-item indent-1">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">llm_controller.py</span>
+            <span class="file-tree-desc">— AI 翻译官（98 行）</span>
+          </div>
+          <div class="file-tree-item indent-1">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">retrievers.py</span>
+            <span class="file-tree-desc">— 数据库管理员（303 行）</span>
+          </div>
+          <div class="file-tree-item indent-1">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">__init__.py</span>
+            <span class="file-tree-desc">— 入口标记（几乎为空）</span>
+          </div>
+          <div class="file-tree-item">
+            <span class="file-tree-icon">📁</span>
+            <span class="file-tree-name">examples/</span>
+          </div>
+          <div class="file-tree-item indent-1">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">sovereign_memory.py</span>
+            <span class="file-tree-desc">— 本地运行示例</span>
+          </div>
+          <div class="file-tree-item">
+            <span class="file-tree-icon">📁</span>
+            <span class="file-tree-name">tests/</span>
+            <span class="file-tree-desc">— 测试文件</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The 4 Characters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四个角色的分工</h2>
+        <p>想象一个<strong>图书馆</strong>场景。每个角色各司其职：</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-card-icon">🧠</div>
+            <div class="pattern-card-title">MemorySystem — 馆长</div>
+            <div class="pattern-card-desc">
+              总指挥。决定新书放哪、旧书怎么整理、读者问什么问题去哪个书架找。住在 <code>memory_system.py</code>。
+            </div>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-card-icon">🗣️</div>
+            <div class="pattern-card-title">LLMController — 翻译官</div>
+            <div class="pattern-card-desc">
+              连接外部 AI（<span class="glossary-term" data-term="OpenAI 是 GPT 系列模型的公司。通过它的 API（编程接口），你的代码可以发送文本给 GPT，得到 AI 的回复。">OpenAI</span> 或 <span class="glossary-term" data-term="Ollama 是一个免费工具，让你在自己电脑上运行 AI 模型，不需要联网，不花钱。适合隐私敏感场景。">Ollama</span>）。馆长需要理解一本书的主题时，就派翻译官去问 AI。住在 <code>llm_controller.py</code>。
+            </div>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-card-icon">🗄️</div>
+            <div class="pattern-card-title">ChromaRetriever — 档案管理员</div>
+            <div class="pattern-card-desc">
+              管理<span class="glossary-term" data-term="向量数据库是一种特殊数据库，它把文本转换成数字向量（一串数字），然后通过计算数字之间的距离来找到含义相似的文本。就像用 GPS 坐标找附近的餐厅。">向量数据库</span> <span class="glossary-term" data-term="ChromaDB 是一个开源的向量数据库，专门为 AI 应用设计。它把文本变成向量存储，这样就能按语义（含义）搜索，而不仅仅是关键词匹配。">ChromaDB</span>。负责存储和检索记忆。住在 <code>retrievers.py</code>。
+            </div>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-card-icon">📋</div>
+            <div class="pattern-card-title">MemoryNote — 卡片本身</div>
+            <div class="pattern-card-desc">
+              每条记忆就是一个 MemoryNote <span class="glossary-term" data-term="对象（Object）是编程中的一个概念——把相关的数据和操作打包在一起。就像一个文件夹，里面装着名字、日期、内容等所有相关信息。">对象</span>。它携带内容、关键词、标签、链接、时间戳等全部信息。也住在 <code>memory_system.py</code>。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: MemoryNote Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MemoryNote：一张记忆卡片长什么样？</h2>
+        <p>这是真实代码中 MemoryNote 的<span class="glossary-term" data-term="初始化（__init__）是 Python 中创建新对象时自动运行的代码。就像填写新员工入职表——名字、部门、工号，一项项填好。">初始化</span>部分——每条记忆出生时，要填好哪些"表格"：</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">memory_system.py · 第 63-81 行</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-comment"># Core content and ID</span>
+<span class="code-keyword">self</span>.content <span class="code-operator">=</span> content
+<span class="code-keyword">self</span>.id <span class="code-operator">=</span> id <span class="code-keyword">or</span> <span class="code-function">str</span>(<span class="code-function">uuid.uuid4</span>())
+
+<span class="code-comment"># Semantic metadata</span>
+<span class="code-keyword">self</span>.keywords <span class="code-operator">=</span> keywords <span class="code-keyword">or</span> []
+<span class="code-keyword">self</span>.links <span class="code-operator">=</span> links <span class="code-keyword">or</span> []
+<span class="code-keyword">self</span>.context <span class="code-operator">=</span> context <span class="code-keyword">or</span> <span class="code-string">"General"</span>
+<span class="code-keyword">self</span>.tags <span class="code-operator">=</span> tags <span class="code-keyword">or</span> []
+
+<span class="code-comment"># Temporal information</span>
+current_time <span class="code-operator">=</span> <span class="code-function">datetime.now</span>().<span class="code-function">strftime</span>(<span class="code-string">"%Y%m%d%H%M"</span>)
+<span class="code-keyword">self</span>.timestamp <span class="code-operator">=</span> timestamp <span class="code-keyword">or</span> current_time
+<span class="code-keyword">self</span>.last_accessed <span class="code-operator">=</span> last_accessed <span class="code-keyword">or</span> current_time
+
+<span class="code-comment"># Usage and evolution data</span>
+<span class="code-keyword">self</span>.retrieval_count <span class="code-operator">=</span> retrieval_count <span class="code-keyword">or</span> <span class="code-number">0</span>
+<span class="code-keyword">self</span>.evolution_history <span class="code-operator">=</span> evolution_history <span class="code-keyword">or</span> []</div>
+          <div class="translation-english">
+            <div class="line-explain">📌 <strong>核心身份</strong></div>
+            <div class="line-explain"><code>content</code> — 记忆的正文内容（比如"用户喜欢深色主题"）</div>
+            <div class="line-explain"><code>id</code> — 唯一编号。如果没给，就自动生成一个 <span class="glossary-term" data-term="UUID 是一种全球唯一的 ID 生成方式，几乎不可能重复。就像身份证号——每个人的都不一样。">UUID</span></div>
+            <div class="line-explain">📌 <strong>语义信息</strong></div>
+            <div class="line-explain"><code>keywords</code> — 关键词列表（由 AI 自动提取）</div>
+            <div class="line-explain"><code>links</code> — 指向相关记忆的链接（卡片盒的核心！）</div>
+            <div class="line-explain"><code>context</code> — 这条记忆属于什么领域，默认"General"</div>
+            <div class="line-explain"><code>tags</code> — 分类标签，用于检索和归类</div>
+            <div class="line-explain">📌 <strong>时间信息</strong></div>
+            <div class="line-explain">获取当前时间，格式如 <code>202603281430</code></div>
+            <div class="line-explain"><code>timestamp</code> — 创建时间（记忆的"出生日期"）</div>
+            <div class="line-explain"><code>last_accessed</code> — 最后访问时间（上次被翻阅是什么时候）</div>
+            <div class="line-explain">📌 <strong>使用与进化</strong></div>
+            <div class="line-explain"><code>retrieval_count</code> — 被检索次数（越多说明越重要）</div>
+            <div class="line-explain"><code>evolution_history</code> — 进化历史（记录这条记忆怎么被修改过的）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: LLMController Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">LLMController：AI 翻译官怎么工作？</h2>
+        <p>翻译官的工作很简单：接收一段提示词，发给 AI，拿回结果。但它的聪明之处在于<span class="glossary-term" data-term="工厂模式是一种编程设计模式——你告诉工厂要什么类型的产品，工厂帮你创建。调用者不需要知道产品具体怎么造的。就像自动售货机：你选饮料类型，机器给你对应的饮料。">工厂模式</span>——一套代码同时支持两种不同的 AI 后端。</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">llm_controller.py · 第 83-94 行</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">class</span> <span class="code-function">LLMController</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>,
+                 backend: <span class="code-function">Literal</span>[<span class="code-string">"openai"</span>, <span class="code-string">"ollama"</span>] <span class="code-operator">=</span> <span class="code-string">"openai"</span>,
+                 model: <span class="code-function">str</span> <span class="code-operator">=</span> <span class="code-string">"gpt-4"</span>,
+                 api_key: Optional[<span class="code-function">str</span>] <span class="code-operator">=</span> <span class="code-keyword">None</span>):
+        <span class="code-keyword">if</span> backend <span class="code-operator">==</span> <span class="code-string">"openai"</span>:
+            <span class="code-keyword">self</span>.llm <span class="code-operator">=</span> <span class="code-function">OpenAIController</span>(model, api_key)
+        <span class="code-keyword">elif</span> backend <span class="code-operator">==</span> <span class="code-string">"ollama"</span>:
+            <span class="code-keyword">self</span>.llm <span class="code-operator">=</span> <span class="code-function">OllamaController</span>(model)
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">raise</span> <span class="code-function">ValueError</span>(<span class="code-string">"Backend must be one of: 'openai', 'ollama'"</span>)</div>
+          <div class="translation-english">
+            <div class="line-explain">定义 LLMController 这个"翻译官"</div>
+            <div class="line-explain">创建翻译官时需要 3 个参数：</div>
+            <div class="line-explain"><code>backend</code> — 选择用哪个 AI，只能填 "openai" 或 "ollama"</div>
+            <div class="line-explain"><code>model</code> — AI 模型名，默认用 GPT-4</div>
+            <div class="line-explain"><code>api_key</code> — API 密钥（Ollama 不需要，因为在本地运行）</div>
+            <div class="line-explain">如果选了 "openai"→ 创建 OpenAI 专用翻译官</div>
+            <div class="line-explain">如果选了 "ollama"→ 创建 Ollama 专用翻译官</div>
+            <div class="line-explain">如果填了别的→ 报错："只能选 openai 或 ollama"</div>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">通用编程思想：策略模式</div>
+            <div class="callout-text">这种"根据选择创建不同实现"的写法叫<strong>策略模式</strong>。好处是：想加新的 AI 后端（比如 Claude），只需要加一个新的 Controller <span class="glossary-term" data-term="类（Class）是代码中的蓝图或模板。它定义了一种东西有什么属性和行为。就像'员工登记表模板'——每个具体员工是这个模板填写出来的一个实例。">类</span>，其他代码完全不用改。对 AI 说"用策略模式"，它就知道你要这种灵活切换的设计。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Module 1 -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-1">
+          <div class="quiz-progress">问题 1/1</div>
+          <div class="quiz-question">你想让 A-MEM 使用 Claude（Anthropic 的模型）作为后端。根据现有代码结构，你需要做什么？</div>
+          <div class="quiz-scenario">提示：回忆一下 LLMController 的工厂模式结构和 BaseLLMController 抽象类。</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="修改 OpenAIController 会破坏现有的 OpenAI 功能。策略模式的精髓是'新增不修改'——加新的，别改旧的。">修改 OpenAIController，让它也支持 Claude</button>
+            <button class="quiz-option" data-correct="true" data-feedback="完美！创建 ClaudeController 继承 BaseLLMController，实现 get_completion 方法，然后在 LLMController 的 __init__ 里加一个 elif backend == 'claude' 分支。这就是策略模式的威力：扩展新功能不需要碰现有代码。">创建新的 ClaudeController 类，继承 BaseLLMController，然后在 LLMController 里加一个分支</button>
+            <button class="quiz-option" data-correct="false" data-feedback="直接替换意味着其他用 OpenAI 的用户就没法用了。好的代码设计是让多种选择共存，而不是非此即彼。">直接把 OpenAI 替换成 Claude 的 API 地址</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 02: DATA FLOW ===== -->
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">数据怎么流动</h1>
+      <p class="module-subtitle">追踪一条记忆从"写入"到"搜出"的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: add_note flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">存入一条记忆：5 步旅程</h2>
+        <p>当你调用 <code>add_note("用户偏好深色模式")</code> 时，就像把一封信投进邮局——看似简单的一步，背后经过了 5 个站点。</p>
+
+        <div class="flow-container" id="flow-add-note">
+          <div class="flow-steps">
+            <div class="flow-step active" data-step="0">
+              <div class="flow-step-icon" style="background: var(--color-actor-1)">📝</div>
+              <div class="flow-step-label">输入内容</div>
+            </div>
+            <div class="flow-arrow" data-step="0">→</div>
+            <div class="flow-step" data-step="1">
+              <div class="flow-step-icon" style="background: var(--color-actor-4)">📋</div>
+              <div class="flow-step-label">创建卡片</div>
+            </div>
+            <div class="flow-arrow" data-step="1">→</div>
+            <div class="flow-step" data-step="2">
+              <div class="flow-step-icon" style="background: var(--color-actor-3)">🤖</div>
+              <div class="flow-step-label">AI 分析</div>
+            </div>
+            <div class="flow-arrow" data-step="2">→</div>
+            <div class="flow-step" data-step="3">
+              <div class="flow-step-icon" style="background: var(--color-actor-5)">🔗</div>
+              <div class="flow-step-label">进化决策</div>
+            </div>
+            <div class="flow-arrow" data-step="3">→</div>
+            <div class="flow-step" data-step="4">
+              <div class="flow-step-icon" style="background: var(--color-actor-2)">🗄️</div>
+              <div class="flow-step-label">存入数据库</div>
+            </div>
+          </div>
+          <div class="flow-desc" id="flow-add-note-desc">
+            第 1 步：你传入一段文本，比如"用户偏好深色模式"
+          </div>
+          <div class="flow-controls">
+            <button class="flow-btn" onclick="flowPrev('add-note')">← 上一步</button>
+            <button class="flow-btn primary" onclick="flowNext('add-note')">下一步 →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: add_note code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">add_note 的代码实现</h2>
+        <p>这是 <code>add_note</code> <span class="glossary-term" data-term="方法（Method）是附属于某个对象的函数。就像一个人（对象）可以'走路'（方法）、'说话'（方法）。调用方法就是让对象执行某个动作。">方法</span>的完整代码——对应刚才动画里的 5 个步骤：</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">memory_system.py · add_note 方法</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">def</span> <span class="code-function">add_note</span>(<span class="code-keyword">self</span>, content: <span class="code-function">str</span>,
+             time: <span class="code-function">str</span> <span class="code-operator">=</span> <span class="code-keyword">None</span>, **kwargs) <span class="code-operator">-></span> <span class="code-function">str</span>:
+    <span class="code-keyword">if</span> time <span class="code-keyword">is not</span> <span class="code-keyword">None</span>:
+        kwargs[<span class="code-string">'timestamp'</span>] <span class="code-operator">=</span> time
+    note <span class="code-operator">=</span> <span class="code-function">MemoryNote</span>(content<span class="code-operator">=</span>content, **kwargs)
+
+    evo_label, note <span class="code-operator">=</span> <span class="code-keyword">self</span>.<span class="code-function">process_memory</span>(note)
+    <span class="code-keyword">self</span>.memories[note.id] <span class="code-operator">=</span> note
+
+    metadata <span class="code-operator">=</span> {
+        <span class="code-string">"id"</span>: note.id,
+        <span class="code-string">"content"</span>: note.content,
+        <span class="code-string">"keywords"</span>: note.keywords,
+        <span class="code-comment"># ... 更多字段</span>
+    }
+    <span class="code-keyword">self</span>.retriever.<span class="code-function">add_document</span>(
+        note.content, metadata, note.id)</div>
+          <div class="translation-english">
+            <div class="line-explain">定义"添加记忆"方法，接收内容文本</div>
+            <div class="line-explain"><span class="glossary-term" data-term="**kwargs 是 Python 的语法糖，表示'接受任意数量的命名参数'。就像一个快递单上的'备注栏'——你可以填也可以不填，想填什么都行。">**kwargs</span> 表示可以传入更多可选信息</div>
+            <div class="line-explain">如果指定了时间，就用指定的时间</div>
+            <div class="line-explain">把时间存到参数包里</div>
+            <div class="line-explain">📋 <strong>步骤 2</strong>：创建一张新的 MemoryNote 卡片</div>
+            <div class="line-explain">🤖 <strong>步骤 3-4</strong>：让 AI 分析这条记忆，决定是否进化</div>
+            <div class="line-explain">把处理好的卡片存到内存字典里</div>
+            <div class="line-explain">🗄️ <strong>步骤 5</strong>：准备元数据……</div>
+            <div class="line-explain">包含 ID、内容、关键词等所有信息</div>
+            <div class="line-explain">发送给 ChromaDB 档案管理员</div>
+            <div class="line-explain">正式入库！记忆保存完成</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat - add_note -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">幕后对话：存记忆时的角色协作</h2>
+        <p>用群聊的方式看看四个角色在 <code>add_note</code> 时怎么配合：</p>
+
+        <div class="group-chat" id="chat-add-note">
+          <div class="group-chat-header">🧠 记忆存储群 · add_note</div>
+          <div class="chat-message" data-delay="0">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">馆</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-1)">馆长 MemorySystem</div>
+              <div class="chat-bubble" style="background: #E4F2F7">收到新内容："用户偏好深色模式"。先创建一张卡片。</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="800">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">卡</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-4)">卡片 MemoryNote</div>
+              <div class="chat-bubble" style="background: #FFF8E1">我准备好了！ID: a3f2...，时间戳：202603281430，关键词和标签还空着。</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="1600">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">馆</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-1)">馆长 MemorySystem</div>
+              <div class="chat-bubble" style="background: #E4F2F7">@档案员 帮我查一下有没有相关的旧记忆？</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="2400">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">档</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-2)">档案员 ChromaRetriever</div>
+              <div class="chat-bubble" style="background: #FDEEE9">找到 3 条相关记忆：#1 "用户界面偏好设置"、#2 "主题切换功能"、#3 "UI配色方案"</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="3200">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">馆</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-1)">馆长 MemorySystem</div>
+              <div class="chat-bubble" style="background: #E4F2F7">@翻译官 帮我分析一下这条新记忆和这 3 条旧记忆的关系，判断要不要进化。</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="4000">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">译</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-3)">翻译官 LLMController</div>
+              <div class="chat-bubble" style="background: #F0ECF9">分析完成！建议进化：把新卡片和 #1 建立链接，标签更新为 ["UI偏好", "深色模式", "用户设置"]。</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="4800">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">馆</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-1)">馆长 MemorySystem</div>
+              <div class="chat-bubble" style="background: #E4F2F7">好的，更新完毕。@档案员 把最终版存进数据库。</div>
+            </div>
+          </div>
+          <div class="chat-message" data-delay="5600">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">档</div>
+            <div>
+              <div class="chat-name" style="color: var(--color-actor-2)">档案员 ChromaRetriever</div>
+              <div class="chat-bubble" style="background: #FDEEE9">已入库 ✅ 向量已生成，随时可以被搜索到。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Search flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">搜索记忆：search_agentic</h2>
+        <p>搜索比存入更有趣——它不只找"包含关键词"的记忆，还会找到关联的"邻居"记忆。就像你在图书馆找到一本书，图书管理员还会推荐旁边书架上的相关书籍。</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">memory_system.py · search_agentic 核心逻辑</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">def</span> <span class="code-function">search_agentic</span>(<span class="code-keyword">self</span>, query, k<span class="code-operator">=</span><span class="code-number">5</span>):
+    results <span class="code-operator">=</span> <span class="code-keyword">self</span>.retriever.<span class="code-function">search</span>(query, k)
+
+    <span class="code-keyword">for</span> i, doc_id <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(results[<span class="code-string">'ids'</span>][<span class="code-number">0</span>]):
+        metadata <span class="code-operator">=</span> results[<span class="code-string">'metadatas'</span>][<span class="code-number">0</span>][i]
+        memories.<span class="code-function">append</span>({...})
+
+    <span class="code-comment"># Add linked memories (neighbors)</span>
+    <span class="code-keyword">for</span> memory <span class="code-keyword">in</span> <span class="code-function">list</span>(memories):
+        links <span class="code-operator">=</span> memory.<span class="code-function">get</span>(<span class="code-string">'links'</span>, [])
+        <span class="code-keyword">for</span> link_id <span class="code-keyword">in</span> links:
+            neighbor <span class="code-operator">=</span> <span class="code-keyword">self</span>.memories.<span class="code-function">get</span>(link_id)
+            memories.<span class="code-function">append</span>({..., <span class="code-string">'is_neighbor'</span>: <span class="code-keyword">True</span>})</div>
+          <div class="translation-english">
+            <div class="line-explain">定义智能搜索方法，k=5 表示最多返回 5 条结果</div>
+            <div class="line-explain">第一步：让档案员在向量数据库里搜索语义最相似的记忆</div>
+            <div class="line-explain">遍历搜索到的每条结果……</div>
+            <div class="line-explain">取出它的元数据（关键词、标签、上下文等）</div>
+            <div class="line-explain">把它加入结果列表</div>
+            <div class="line-explain">🔗 <strong>关键步骤：追踪链接</strong></div>
+            <div class="line-explain">对每条已找到的记忆，检查它有没有"链接"指向其他记忆</div>
+            <div class="line-explain">取出这条记忆的链接列表</div>
+            <div class="line-explain">逐个查看链接指向的记忆</div>
+            <div class="line-explain">找到那条"邻居"记忆</div>
+            <div class="line-explain">加入结果，并标记 <code>is_neighbor: True</code>（这是关联推荐）</div>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">这就是 A-MEM 比普通搜索强的地方</div>
+            <div class="callout-text">普通<span class="glossary-term" data-term="向量搜索（Vector Search）是通过计算文本之间的'数学距离'来找相似内容的技术。两段文字的含义越接近，它们的向量距离越近。就像在地图上找最近的咖啡店。">向量搜索</span>只返回"最相似的 K 条"。但 A-MEM 在此基础上还会沿着 links 追踪<strong>关联记忆</strong>——就像 Wikipedia 里的蓝色链接，让你发现意想不到的相关知识。这就是 Zettelkasten 理念的代码实现。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Module 2 -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-2">
+          <div class="quiz-progress">问题 1/1</div>
+          <div class="quiz-question">你的 AI 助手用 A-MEM 搜索"项目预算"，返回了一条标记为 is_neighbor: True 的记忆，内容是"Q3 营收报告"。这条结果是怎么出现的？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="向量搜索确实会找语义相似的内容，但 is_neighbor 标记明确说明它是通过链接找到的，而不是直接搜索到的。">因为"Q3 营收报告"和"项目预算"在语义上很相似</button>
+            <button class="quiz-option" data-correct="true" data-feedback="正确！search_agentic 先用向量搜索找到直接匹配（比如'年度预算计划'），然后沿着这条记忆的 links 找到了关联的'Q3 营收报告'。is_neighbor: True 就是这个追踪过程的标记。">因为某条直接匹配的记忆（如"年度预算"）的 links 字段指向了这条记忆</button>
+            <button class="quiz-option" data-correct="false" data-feedback="A-MEM 的标签系统用于分类，但 is_neighbor 机制是通过 links 字段实现的，不是通过标签匹配。">因为它们共享相同的标签</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 03: EXTERNAL WORLD ===== -->
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">连接外部世界</h1>
+      <p class="module-subtitle">A-MEM 依赖两个外部服务：向量数据库（ChromaDB）和大语言模型（LLM）</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: Two pillars -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两根支柱</h2>
+        <p>A-MEM 的核心逻辑自己不存数据、也自己不理解语言。它把这两件事分别委托给了两个专业选手：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-card-icon">🗄️</div>
+            <div class="pattern-card-title">ChromaDB — 记忆仓库</div>
+            <div class="pattern-card-desc">
+              一个<span class="glossary-term" data-term="开源（Open Source）意味着代码是公开的，任何人都可以免费使用、查看和修改。就像公开菜谱——你可以自己做，也可以改良。">开源</span>向量数据库。它不是按关键词搜索（像百度），而是按<strong>语义相似度</strong>搜索。"用户想要暗色界面"和"深色模式偏好"，即使没有相同的词，也能被匹配到。
+            </div>
+            <div class="badge-row">
+              <span class="badge badge-accent">语义搜索</span>
+              <span class="badge badge-success">本地运行</span>
+              <span class="badge badge-purple">免费开源</span>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-card-icon">🧠</div>
+            <div class="pattern-card-title">LLM — 理解引擎</div>
+            <div class="pattern-card-desc">
+              大语言模型负责"理解"记忆的内容：提取关键词、判断上下文、决定记忆之间的关联。就像雇了一个能读懂所有语言的分析师。
+            </div>
+            <div class="badge-row">
+              <span class="badge badge-accent">OpenAI（云端）</span>
+              <span class="badge badge-success">Ollama（本地）</span>
+              <span class="badge badge-warn">需要 API Key 或本地模型</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ChromaDB how it works -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ChromaDB：语义搜索怎么工作？</h2>
+        <p>传统数据库搜索是"逐字匹配"——搜"苹果"只会找到包含"苹果"这两个字的记录。向量数据库完全不同：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">文本 → 向量</div>
+              <div class="step-desc"><span class="glossary-term" data-term="Embedding（嵌入）是把文字变成一串数字的过程。这串数字捕捉了文字的'含义'。含义相近的文字会变成相近的数字串，这样计算机就能通过比较数字来判断两段文字是否相关。">Embedding 模型</span>把每段文本转成一串数字（向量）。A-MEM 用的是 <span class="glossary-term" data-term="all-MiniLM-L6-v2 是一个轻量级的文本嵌入模型，由 sentence-transformers 提供。它虽然小（约 80MB），但效果很好，能在普通电脑上快速运行。">all-MiniLM-L6-v2</span> 模型，只有 80MB，在你自己电脑上就能运行。</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">存入向量空间</div>
+              <div class="step-desc">这串数字被存进 ChromaDB。你可以想象成把一个点放进一个高维地图——含义相近的文本会被放在地图上相邻的位置。</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">搜索 = 找最近的点</div>
+              <div class="step-desc">搜索时，查询文本也被转成向量，然后在地图上找距离最近的几个点。距离近 = 含义相似。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">retrievers.py · ChromaRetriever.search</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">def</span> <span class="code-function">search</span>(<span class="code-keyword">self</span>, query: <span class="code-function">str</span>, k: <span class="code-function">int</span> <span class="code-operator">=</span> <span class="code-number">5</span>):
+    results <span class="code-operator">=</span> <span class="code-keyword">self</span>.collection.<span class="code-function">query</span>(
+        query_texts<span class="code-operator">=</span>[query], n_results<span class="code-operator">=</span>k)
+
+    <span class="code-keyword">if</span> results <span class="code-keyword">and</span> results.<span class="code-function">get</span>(<span class="code-string">"metadatas"</span>, []):
+        results[<span class="code-string">"metadatas"</span>] <span class="code-operator">=</span> \
+            <span class="code-keyword">self</span>.<span class="code-function">_convert_metadata_types</span>(
+                results[<span class="code-string">"metadatas"</span>])
+    <span class="code-keyword">return</span> results</div>
+          <div class="translation-english">
+            <div class="line-explain">定义搜索方法：接收查询文本和返回数量 k</div>
+            <div class="line-explain">调用 ChromaDB 的 query 方法</div>
+            <div class="line-explain">传入查询文本，让它找最相似的 k 条记忆</div>
+            <div class="line-explain">如果搜到了结果，并且有元数据……</div>
+            <div class="line-explain">把元数据的格式转换回来</div>
+            <div class="line-explain">（因为 ChromaDB 存储时把列表和字典转成了字符串）</div>
+            <div class="line-explain">返回搜索结果</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Three types of retrievers -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三种档案管理员</h2>
+        <p>A-MEM 提供了三种不同的数据存储方式，就像三种不同的笔记本——按需选择：</p>
+
+        <div class="pattern-cards" style="grid-template-columns: 1fr">
+          <div class="pattern-card" style="border-left: 4px solid var(--color-actor-1)">
+            <div class="pattern-card-title">🔵 ChromaRetriever — 临时记事本</div>
+            <div class="pattern-card-desc">
+              数据只存在内存里，程序关闭就消失。适合<strong>测试</strong>和<strong>一次性任务</strong>。
+              <div class="badge-row"><span class="badge badge-accent">速度最快</span><span class="badge badge-warn">关机即消失</span></div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-left: 4px solid var(--color-actor-5)">
+            <div class="pattern-card-title">🟢 PersistentChromaRetriever — 永久笔记本</div>
+            <div class="pattern-card-desc">
+              数据存在硬盘上，重启后还在。适合<strong>生产环境</strong>。有个 <code>extend</code> 参数防止误覆盖已有数据。
+              <div class="badge-row"><span class="badge badge-success">持久存储</span><span class="badge badge-accent">防误覆盖</span></div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-left: 4px solid var(--color-actor-3)">
+            <div class="pattern-card-title">🟣 CopiedChromaRetriever — 复印件</div>
+            <div class="pattern-card-desc">
+              把已有的数据库<strong>复制一份</strong>到临时目录。每个 AI <span class="glossary-term" data-term="Agent（代理/智能体）是能自主完成任务的 AI 程序。它可以调用工具、做决策、执行多步操作。就像一个能独立工作的虚拟助手。">Agent</span> 拿到自己的副本，互不干扰。适合<strong>多 Agent 并发</strong>场景。
+              <div class="badge-row"><span class="badge badge-purple">隔离安全</span><span class="badge badge-accent">自动清理</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">通用编程思想：继承与扩展</div>
+            <div class="callout-text">三个 Retriever 用了<span class="glossary-term" data-term="继承（Inheritance）是面向对象编程的核心概念。一个'子类'可以继承'父类'的所有功能，然后只修改或添加不同的部分。就像子女继承父母的基因，但也有自己的特征。">继承</span>关系：PersistentChromaRetriever 继承 ChromaRetriever，CopiedChromaRetriever 又继承 PersistentChromaRetriever。子类只改了<strong>初始化方式</strong>（数据从哪来），搜索和存储的逻辑<strong>完全复用</strong>父类。下次你对 AI 说"用继承来复用这部分逻辑"，就是这个意思。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: LLM structured output -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">LLM 的结构化输出</h2>
+        <p>A-MEM 让 AI 做分析时，不是让它随便回答，而是<strong>规定了回答格式</strong>——必须返回一个结构整齐的<span class="glossary-term" data-term="JSON（JavaScript Object Notation）是一种数据格式，用大括号和键值对组织信息。比如 {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 30}。几乎所有编程语言都能读写 JSON，是数据交换的通用语言。">JSON</span>。这就像让实习生写报告不是说"随便写"，而是给一个<strong>模板</strong>。</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">memory_system.py · analyze_content 的 JSON Schema</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code">response_format<span class="code-operator">=</span>{
+    <span class="code-string">"type"</span>: <span class="code-string">"json_schema"</span>,
+    <span class="code-string">"json_schema"</span>: {
+        <span class="code-string">"name"</span>: <span class="code-string">"response"</span>,
+        <span class="code-string">"schema"</span>: {
+            <span class="code-string">"type"</span>: <span class="code-string">"object"</span>,
+            <span class="code-string">"properties"</span>: {
+                <span class="code-string">"keywords"</span>: {
+                    <span class="code-string">"type"</span>: <span class="code-string">"array"</span>,
+                    <span class="code-string">"items"</span>: {<span class="code-string">"type"</span>: <span class="code-string">"string"</span>}
+                },
+                <span class="code-string">"context"</span>: {<span class="code-string">"type"</span>: <span class="code-string">"string"</span>},
+                <span class="code-string">"tags"</span>: {
+                    <span class="code-string">"type"</span>: <span class="code-string">"array"</span>,
+                    <span class="code-string">"items"</span>: {<span class="code-string">"type"</span>: <span class="code-string">"string"</span>}
+                }
+            }
+        }
+    }
+}</div>
+          <div class="translation-english">
+            <div class="line-explain">告诉 AI：返回格式必须是 JSON</div>
+            <div class="line-explain">定义一个叫 "response" 的 JSON 模板……</div>
+            <div class="line-explain">包含以下字段规范：</div>
+            <div class="line-explain">返回的必须是一个对象（字典）</div>
+            <div class="line-explain">对象里要有这些字段：</div>
+            <div class="line-explain"><code>keywords</code> — 必须是一个数组</div>
+            <div class="line-explain">数组里的每一项必须是字符串</div>
+            <div class="line-explain">（比如 ["深色模式", "用户偏好", "UI设置"]）</div>
+            <div class="line-explain"><code>context</code> — 必须是一个字符串</div>
+            <div class="line-explain"><code>tags</code> — 也必须是一个字符串数组</div>
+            <div class="line-explain">（比如 ["UI", "偏好", "设置"]）</div>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">实用技巧：JSON Schema 让 AI 输出可靠</div>
+            <div class="callout-text">如果你不规定格式，AI 可能返回 "关键词有：深色模式、用户偏好" 这样的自由文本——你的代码没法解析。用 <span class="glossary-term" data-term="JSON Schema 是一套规则，用来描述 JSON 数据应该长什么样。就像表格模板规定了'姓名栏填文字，年龄栏填数字'，JSON Schema 规定了每个字段的类型和结构。">JSON Schema</span> 强制 AI 返回 <code>{"keywords": ["深色模式", "用户偏好"]}</code>，代码就能直接用了。这是与 AI <span class="glossary-term" data-term="API（Application Programming Interface，应用编程接口）是程序之间交流的规则。就像餐厅菜单——你不需要知道厨房怎么运作，只需按菜单点菜（调用 API），就能得到你要的菜（数据）。">API</span> 打交道的必备技巧。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Module 3 -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-3">
+          <div class="quiz-progress">问题 1/1</div>
+          <div class="quiz-question">你在搭建一个多人协作的 AI 应用，每个用户的 AI 助手需要有自己的记忆空间，但初始时要共享一套"公司知识库"。你应该用哪种 Retriever？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="ChromaRetriever 是临时的，程序重启数据就没了。而且它也不支持从已有集合初始化。">ChromaRetriever — 反正每个用户创建一个新的就行</button>
+            <button class="quiz-option" data-correct="false" data-feedback="PersistentChromaRetriever 虽然能持久化，但多个 Agent 共用同一个集合会互相污染对方的数据。你需要的是隔离。">PersistentChromaRetriever — 用 extend=True 让每个人共享</button>
+            <button class="quiz-option" data-correct="true" data-feedback="完美选择！CopiedChromaRetriever 从公司知识库复制一份到临时目录，每个 Agent 拥有自己的独立副本。新增的记忆不会影响原始知识库，也不会影响其他 Agent。用完后自动清理。">CopiedChromaRetriever — 每个 Agent 从公司知识库复制一份独立副本</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 04: CLEVER PATTERNS ===== -->
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">巧妙的设计模式</h1>
+      <p class="module-subtitle">A-MEM 用了哪些聪明技巧，让记忆系统更可靠、更灵活</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: Memory Evolution -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">记忆进化机制</h2>
+        <p>A-MEM 最精妙的设计是<strong>记忆进化</strong>——新记忆加入时，不只是简单地"塞进去"，而是让 AI 审视新旧记忆的关系，决定是否要更新整个知识网络。</p>
+        <p>这就像一个经验丰富的图书管理员：每次收到新书，不只是放到书架上，还会检查"这本书和哪些旧书有关系？旧书的分类标签需不需要更新？"</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-number" style="background: var(--color-actor-5)">1</div>
+            <div class="step-content">
+              <div class="step-title">找到邻居</div>
+              <div class="step-desc">用向量搜索找到与新记忆最相关的 5 条旧记忆</div>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-number" style="background: var(--color-actor-3)">2</div>
+            <div class="step-content">
+              <div class="step-title">AI 分析关系</div>
+              <div class="step-desc">把新旧记忆一起发给 LLM，问："它们有关系吗？应该怎么进化？"</div>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-number" style="background: var(--color-actor-1)">3</div>
+            <div class="step-content">
+              <div class="step-title">执行进化动作</div>
+              <div class="step-desc">LLM 返回两种可能的动作：<strong>strengthen</strong>（给新记忆加链接和标签）或 <strong>update_neighbor</strong>（更新旧记忆的上下文和标签）</div>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-number" style="background: var(--color-actor-2)">4</div>
+            <div class="step-content">
+              <div class="step-title">定期整合</div>
+              <div class="step-desc">每进化 <code>evo_threshold</code>（默认 100）次，触发一次<span class="glossary-term" data-term="整合（Consolidate）是把散乱的信息重新组织整理的过程。在 A-MEM 里，是清空向量数据库然后把所有记忆（包括已更新的）重新存入，确保搜索索引和记忆内容完全同步。">整合</span>——重建整个向量索引</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: process_memory code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">进化决策的代码</h2>
+        <p><code>process_memory</code> 是整个进化机制的核心——它决定一条新记忆是否应该和已有知识建立联系：</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">memory_system.py · process_memory 核心逻辑</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">def</span> <span class="code-function">process_memory</span>(<span class="code-keyword">self</span>, note):
+    <span class="code-keyword">if not</span> <span class="code-keyword">self</span>.memories:
+        <span class="code-keyword">return</span> <span class="code-keyword">False</span>, note
+
+    neighbors_text, indices <span class="code-operator">=</span> \
+        <span class="code-keyword">self</span>.<span class="code-function">find_related_memories</span>(note.content)
+
+    prompt <span class="code-operator">=</span> <span class="code-keyword">self</span>._evolution_system_prompt.<span class="code-function">format</span>(
+        content<span class="code-operator">=</span>note.content,
+        keywords<span class="code-operator">=</span>note.keywords,
+        nearest_neighbors_memories<span class="code-operator">=</span>neighbors_text,
+        neighbor_number<span class="code-operator">=</span><span class="code-function">len</span>(indices))
+
+    response <span class="code-operator">=</span> <span class="code-keyword">self</span>.llm_controller.llm.<span class="code-function">get_completion</span>(
+        prompt, response_format<span class="code-operator">=</span>{...})
+    response_json <span class="code-operator">=</span> json.<span class="code-function">loads</span>(response)
+
+    <span class="code-keyword">if</span> response_json[<span class="code-string">"should_evolve"</span>]:
+        <span class="code-keyword">for</span> action <span class="code-keyword">in</span> response_json[<span class="code-string">"actions"</span>]:
+            <span class="code-keyword">if</span> action <span class="code-operator">==</span> <span class="code-string">"strengthen"</span>:
+                note.links.<span class="code-function">extend</span>(connections)
+                note.tags <span class="code-operator">=</span> new_tags</div>
+          <div class="translation-english">
+            <div class="line-explain">定义"处理记忆"方法</div>
+            <div class="line-explain">如果系统里还没有任何记忆（第一条），跳过进化</div>
+            <div class="line-explain">直接返回：不进化 + 原始卡片</div>
+            <div class="line-explain">在已有记忆中搜索与新记忆最相关的</div>
+            <div class="line-explain">返回邻居的文本描述和索引</div>
+            <div class="line-explain">构造发给 AI 的提示词：</div>
+            <div class="line-explain">把新记忆的内容、关键词</div>
+            <div class="line-explain">以及邻居的信息填进模板</div>
+            <div class="line-explain">邻居数量也告诉 AI</div>
+            <div class="line-explain">发送给 LLM，要求返回 JSON 格式</div>
+            <div class="line-explain">把返回的 JSON 字符串解析成字典</div>
+            <div class="line-explain">如果 AI 说"应该进化"……</div>
+            <div class="line-explain">遍历 AI 建议的每个动作</div>
+            <div class="line-explain">如果是 "strengthen"：给新记忆添加链接</div>
+            <div class="line-explain">并更新新记忆的标签</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Metadata serialization -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">元数据序列化：一个容易踩的坑</h2>
+        <p>ChromaDB 有个限制：<span class="glossary-term" data-term="元数据（Metadata）是'关于数据的数据'。比如一张照片的元数据包括拍摄时间、GPS 位置、相机型号等。在 A-MEM 里，元数据指的是记忆的关键词、标签、时间戳等附加信息。">元数据</span>只能存基本类型（字符串、数字），不能直接存<span class="glossary-term" data-term="列表/数组（List/Array）是编程中存储多个值的容器。比如 ['苹果', '香蕉', '橘子'] 就是一个水果列表。用方括号 [] 表示。">列表</span>或<span class="glossary-term" data-term="字典（Dictionary/Dict）是编程中的键值对容器。用大括号 {} 表示，每项都有一个'键'和一个'值'。比如 {'name': '小明', 'age': 25}。">字典</span>。A-MEM 的解决方案很实用：</p>
+
+        <div class="translation-block">
+          <div class="translation-label translation-label-code">retrievers.py · add_document 序列化</div>
+          <div class="translation-label translation-label-english">逐行翻译</div>
+          <div class="translation-code"><span class="code-keyword">def</span> <span class="code-function">add_document</span>(<span class="code-keyword">self</span>, document, metadata, doc_id):
+    processed_metadata <span class="code-operator">=</span> {}
+    <span class="code-keyword">for</span> key, value <span class="code-keyword">in</span> metadata.<span class="code-function">items</span>():
+        <span class="code-keyword">if</span> <span class="code-function">isinstance</span>(value, <span class="code-function">list</span>):
+            processed_metadata[key] <span class="code-operator">=</span> json.<span class="code-function">dumps</span>(value)
+        <span class="code-keyword">elif</span> <span class="code-function">isinstance</span>(value, <span class="code-function">dict</span>):
+            processed_metadata[key] <span class="code-operator">=</span> json.<span class="code-function">dumps</span>(value)
+        <span class="code-keyword">else</span>:
+            processed_metadata[key] <span class="code-operator">=</span> <span class="code-function">str</span>(value)
+
+    <span class="code-keyword">self</span>.collection.<span class="code-function">add</span>(
+        documents<span class="code-operator">=</span>[document],
+        metadatas<span class="code-operator">=</span>[processed_metadata],
+        ids<span class="code-operator">=</span>[doc_id])</div>
+          <div class="translation-english">
+            <div class="line-explain">定义"存文档"方法</div>
+            <div class="line-explain">创建一个空字典，用来存处理后的元数据</div>
+            <div class="line-explain">遍历每一项元数据……</div>
+            <div class="line-explain">如果值是列表（比如关键词列表 ["AI", "记忆"]）</div>
+            <div class="line-explain">→ 用 <span class="glossary-term" data-term="json.dumps() 把 Python 对象转成 JSON 字符串。比如 ['a','b'] 变成字符串 '[&quot;a&quot;,&quot;b&quot;]'。读取时用 json.loads() 反向转换。这个过程叫序列化/反序列化。">json.dumps</span> 转成字符串存储</div>
+            <div class="line-explain">如果值是字典</div>
+            <div class="line-explain">→ 同样转成 JSON 字符串</div>
+            <div class="line-explain">其他类型</div>
+            <div class="line-explain">→ 直接转成字符串</div>
+            <div class="line-explain">然后把处理好的数据交给 ChromaDB 存储</div>
+            <div class="line-explain">（文档内容、元数据、唯一 ID 一起入库）</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">实用经验：数据格式转换是常见 bug 来源</div>
+            <div class="callout-text">存的时候把列表变成字符串，读的时候要记得变回来。A-MEM 在 <code>_convert_metadata_types</code> 方法里用 <code>ast.literal_eval</code> 做反向转换。如果你在开发中遇到"数据存进去是对的，读出来变成字符串了"，大概率就是这类序列化问题。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Module 4 -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-4">
+          <div class="quiz-progress">问题 1/1</div>
+          <div class="quiz-question">你的 AI 应用最近出了个 bug：搜索记忆时，返回的 keywords 字段是字符串 '["AI", "记忆"]' 而不是列表 ["AI", "记忆"]。最可能的原因是什么？</div>
+          <div class="quiz-scenario">提示：回忆一下 ChromaDB 元数据的存储和读取流程。</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="ChromaDB 返回的是它存储时的格式。问题出在存取过程中的格式转换，不是 ChromaDB 本身的 bug。">ChromaDB 的搜索功能有 bug</button>
+            <button class="quiz-option" data-correct="true" data-feedback="答对了！add_document 时用 json.dumps 把列表转成了字符串存入 ChromaDB。读取时必须用 _convert_metadata_types 方法把字符串转回列表。如果这个反序列化步骤被跳过或出错了，你就会看到字符串而不是列表。">读取结果时，_convert_metadata_types 方法没有正确执行，列表没有从字符串反序列化回来</button>
+            <button class="quiz-option" data-correct="false" data-feedback="存入时 json.dumps 确实会转成字符串，但这是设计如此（因为 ChromaDB 不支持存列表）。问题在于读取时没有转回来。">存入时 json.dumps 把列表错误地转成了字符串</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULE 05: BIG PICTURE ===== -->
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">全景：架构与实战</h1>
+      <p class="module-subtitle">站远一步看全局——A-MEM 的技术栈、架构层次，以及怎么集成到你的项目</p>
+    </header>
+
+    <div class="module-body">
+      <!-- Screen 1: Architecture layers -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三层架构</h2>
+        <p>从上到下，A-MEM 可以分成三层。每一层各管一件事，互不干扰：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-layer" style="background: var(--color-accent-light); border: 2px solid var(--color-accent)">
+            🧠 应用层：AgenticMemorySystem<br>
+            <span style="font-size: var(--text-xs); font-weight: 400; color: var(--color-text-secondary)">CRUD 操作 + 进化逻辑 + 搜索编排</span>
+          </div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-layer" style="background: #F0ECF9; border: 2px solid var(--color-actor-3)">
+            🗣️ 智能层：LLMController<br>
+            <span style="font-size: var(--text-xs); font-weight: 400; color: var(--color-text-secondary)">内容分析 + 进化决策 + 结构化输出</span>
+          </div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-layer" style="background: #FDEEE9; border: 2px solid var(--color-actor-2)">
+            🗄️ 存储层：ChromaRetriever<br>
+            <span style="font-size: var(--text-xs); font-weight: 400; color: var(--color-text-secondary)">向量存储 + 语义检索 + 元数据管理</span>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">通用编程思想：分层架构</div>
+            <div class="callout-text">三层架构是软件工程中最经典的设计之一。好处是<strong>各层独立替换</strong>：想换数据库？只改存储层。想换 AI 模型？只改智能层。应用层的逻辑完全不受影响。下次对 AI 说"按分层架构设计"，它就知道你要这种解耦结构。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tech stack -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">技术栈一览</h2>
+        <p>A-MEM 的<span class="glossary-term" data-term="依赖（Dependency）是你的项目需要用到的外部代码库/工具。就像做菜需要的食材清单——你的代码'依赖'这些库才能运行。">依赖</span>不多，但每个都选得很精准：</p>
+
+        <div class="icon-row">
+          <div class="icon-item">
+            <div class="icon-item-emoji">🧠</div>
+            <div class="icon-item-label">sentence-transformers</div>
+            <div class="icon-item-desc">文本→向量转换</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">🗄️</div>
+            <div class="icon-item-label">ChromaDB</div>
+            <div class="icon-item-desc">向量数据库</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">🔗</div>
+            <div class="icon-item-label">LiteLLM</div>
+            <div class="icon-item-desc">统一 LLM 接口</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">📊</div>
+            <div class="icon-item-label">scikit-learn</div>
+            <div class="icon-item-desc">相似度计算</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">📝</div>
+            <div class="icon-item-label">NLTK</div>
+            <div class="icon-item-desc">文本分词</div>
+          </div>
+          <div class="icon-item">
+            <div class="icon-item-emoji">🔢</div>
+            <div class="icon-item-label">NumPy</div>
+            <div class="icon-item-desc">数值计算</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Integration guide -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">集成到你的项目</h2>
+        <p>三步就能给你的 AI 应用加上长期记忆：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">安装</div>
+              <div class="step-desc" style="font-family: var(--font-mono); background: var(--color-bg-code); color: #CDD6F4; padding: 8px 12px; border-radius: 6px; margin-top: 4px">pip install agentic-memory</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">初始化</div>
+              <div class="step-desc" style="font-family: var(--font-mono); background: var(--color-bg-code); color: #CDD6F4; padding: 8px 12px; border-radius: 6px; margin-top: 4px; white-space: pre-wrap">memory = AgenticMemorySystem(
+    llm_backend="openai",
+    llm_model="gpt-4o-mini"
+)</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">使用</div>
+              <div class="step-desc" style="font-family: var(--font-mono); background: var(--color-bg-code); color: #CDD6F4; padding: 8px 12px; border-radius: 6px; margin-top: 4px; white-space: pre-wrap"><span style="color:#6C7086"># 存入记忆</span>
+memory.add_note("用户偏好深色模式")
+
+<span style="color:#6C7086"># 搜索记忆</span>
+results = memory.search_agentic("界面设置")</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚡</span>
+          <div class="callout-content">
+            <div class="callout-title">性能提示</div>
+            <div class="callout-text">首次运行时，<code>sentence-transformers</code> 会下载约 80MB 的 embedding 模型。之后会缓存在本地。如果你在生产环境遇到冷启动慢的问题，可以预先下载模型或使用 Docker 打包。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: What you've learned -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">回顾：你学到了什么</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🧩</div>
+            <div class="pattern-card-title">分层架构</div>
+            <div class="pattern-card-desc">应用层、智能层、存储层各司其职，独立替换</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🔄</div>
+            <div class="pattern-card-title">策略模式</div>
+            <div class="pattern-card-desc">一个接口支持多种实现，新增不需改旧代码</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🧬</div>
+            <div class="pattern-card-title">记忆进化</div>
+            <div class="pattern-card-desc">新旧记忆互相影响，知识网络持续生长</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🎯</div>
+            <div class="pattern-card-title">结构化输出</div>
+            <div class="pattern-card-desc">用 JSON Schema 控制 AI 返回格式，代码可以直接解析</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-5">
+          <div class="quiz-progress">最终挑战</div>
+          <div class="quiz-question">综合场景：你在开发一个法律咨询 AI，需要记住每个客户的案件细节和法律偏好。以下哪个架构决策最合理？</div>
+          <div class="quiz-scenario">需求：每个律师用自己的 AI 助手，共享一套法律知识库；案件数据必须持久化；不同客户的数据要隔离。</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false" data-feedback="ChromaRetriever 是内存模式，程序重启数据就丢了。法律案件数据不能丢失，需要持久化存储。">用 ChromaRetriever，每个客户的数据在内存里就够了</button>
+            <button class="quiz-option" data-correct="false" data-feedback="所有律师共享一个 PersistentChromaRetriever 会导致数据污染——A 律师的案件细节可能出现在 B 律师的搜索结果里。客户数据隔离是法律行业的硬性要求。">用一个 PersistentChromaRetriever，所有律师共享同一个集合</button>
+            <button class="quiz-option" data-correct="true" data-feedback="架构清晰！法律知识库用 PersistentChromaRetriever 持久化存储（所有人共享基础法规知识），每个律师的 AI 助手用 CopiedChromaRetriever 从知识库复制一份独立副本，再加上各自的案件记忆。这样既共享了通用知识，又保证了客户数据隔离。">法律知识库用 PersistentChromaRetriever 持久化；每个律师用 CopiedChromaRetriever 从知识库复制一份独立副本来工作</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Ending -->
+      <section class="screen animate-in">
+        <div class="hero-visual" style="background: linear-gradient(135deg, #E4F2F7 0%, #F0ECF9 50%, #FDEEE9 100%)">
+          <div class="hero-emoji">🎓</div>
+          <div class="hero-tagline">恭喜完成课程！</div>
+          <div class="hero-sub">你已经掌握了 A-MEM 的核心架构、数据流、设计模式和集成方法。现在你有能力让 AI 拥有真正的长期记忆。</div>
+          <div class="badge-row" style="justify-content: center; margin-top: var(--space-6)">
+            <span class="badge badge-accent">NeurIPS 2025</span>
+            <span class="badge badge-success">开源免费</span>
+            <span class="badge badge-purple">Zettelkasten</span>
+            <span class="badge badge-warn">记忆进化</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+(function() {
+  'use strict';
+
+  // ===== SCROLL ANIMATIONS =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // Stagger children
+  document.querySelectorAll('.stagger-children').forEach(parent => {
+    Array.from(parent.children).forEach((child, i) => {
+      child.style.setProperty('--stagger-index', i);
+    });
+  });
+
+  // ===== PROGRESS BAR =====
+  const progressBar = document.getElementById('progressBar');
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+  }
+  window.addEventListener('scroll', () => {
+    requestAnimationFrame(updateProgressBar);
+  }, { passive: true });
+
+  // ===== NAV DOTS =====
+  const navDots = document.querySelectorAll('.nav-dot');
+  const modules = document.querySelectorAll('.module');
+  const visited = new Set([0]);
+
+  navDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = document.getElementById(dot.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Tooltip positioning for nav dots
+  navDots.forEach(dot => {
+    dot.addEventListener('mouseenter', (e) => {
+      const tooltip = dot.querySelector('::after');
+      // CSS handles this via data-tooltip
+    });
+  });
+
+  const moduleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const moduleIndex = Array.from(modules).indexOf(entry.target);
+        visited.add(moduleIndex);
+        navDots.forEach((dot, i) => {
+          dot.classList.remove('active');
+          if (visited.has(i) && i !== moduleIndex) dot.classList.add('visited');
+        });
+        navDots[moduleIndex].classList.add('active');
+        navDots[moduleIndex].classList.remove('visited');
+      }
+    });
+  }, { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
+
+  modules.forEach(m => moduleObserver.observe(m));
+
+  // ===== KEYBOARD NAVIGATION =====
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+    const currentIndex = Array.from(navDots).findIndex(d => d.classList.contains('active'));
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (currentIndex < modules.length - 1) {
+        modules[currentIndex + 1].scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (currentIndex > 0) {
+        modules[currentIndex - 1].scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
+
+  // ===== GLOSSARY TOOLTIPS =====
+  let activeTooltip = null;
+
+  function showTooltip(term, rect) {
+    hideTooltip();
+    const popup = document.createElement('div');
+    popup.className = 'tooltip-popup';
+    popup.textContent = term.dataset.term;
+    document.body.appendChild(popup);
+
+    // Position using fixed coordinates from getBoundingClientRect
+    const popupRect = popup.getBoundingClientRect();
+    let top = rect.top - popup.offsetHeight - 8;
+    let left = rect.left + rect.width / 2 - popup.offsetWidth / 2;
+
+    // Keep within viewport
+    if (top < 8) top = rect.bottom + 8;
+    if (left < 8) left = 8;
+    if (left + popup.offsetWidth > window.innerWidth - 8) {
+      left = window.innerWidth - popup.offsetWidth - 8;
+    }
+
+    popup.style.top = top + 'px';
+    popup.style.left = left + 'px';
+    requestAnimationFrame(() => popup.classList.add('show'));
+    activeTooltip = popup;
+  }
+
+  function hideTooltip() {
+    if (activeTooltip) {
+      activeTooltip.remove();
+      activeTooltip = null;
+    }
+  }
+
+  // Desktop: hover
+  document.addEventListener('mouseover', (e) => {
+    const term = e.target.closest('.glossary-term');
+    if (term) {
+      const rect = term.getBoundingClientRect();
+      showTooltip(term, rect);
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    const term = e.target.closest('.glossary-term');
+    if (term) hideTooltip();
+  });
+
+  // Mobile: tap
+  document.addEventListener('touchstart', (e) => {
+    const term = e.target.closest('.glossary-term');
+    if (term) {
+      e.preventDefault();
+      const rect = term.getBoundingClientRect();
+      showTooltip(term, rect);
+      setTimeout(hideTooltip, 3000);
+    } else {
+      hideTooltip();
+    }
+  }, { passive: false });
+
+  // ===== FLOW ANIMATION =====
+  const flowStates = {};
+
+  const flowDescriptions = {
+    'add-note': [
+      '第 1 步：你传入一段文本，比如"用户偏好深色模式"',
+      '第 2 步：系统创建一张 MemoryNote 卡片，自动生成 UUID、时间戳',
+      '第 3 步：调用 LLM 分析内容，找到相关的旧记忆（最近邻搜索）',
+      '第 4 步：LLM 判断是否需要进化——是否建立链接、更新标签',
+      '第 5 步：最终版卡片存入 ChromaDB 向量数据库，生成向量索引'
+    ]
+  };
+
+  function initFlow(flowId) {
+    if (!flowStates[flowId]) flowStates[flowId] = 0;
+  }
+
+  function updateFlow(flowId) {
+    const container = document.getElementById('flow-' + flowId);
+    if (!container) return;
+    const step = flowStates[flowId];
+    const steps = container.querySelectorAll('.flow-step');
+    const arrows = container.querySelectorAll('.flow-arrow');
+    const desc = document.getElementById('flow-' + flowId + '-desc');
+
+    steps.forEach((s, i) => {
+      s.classList.toggle('active', i <= step);
+    });
+    arrows.forEach((a, i) => {
+      a.classList.toggle('active', i < step);
+    });
+    if (desc && flowDescriptions[flowId]) {
+      desc.textContent = flowDescriptions[flowId][step] || '';
+    }
+  }
+
+  window.flowNext = function(flowId) {
+    initFlow(flowId);
+    const container = document.getElementById('flow-' + flowId);
+    const maxStep = container.querySelectorAll('.flow-step').length - 1;
+    if (flowStates[flowId] < maxStep) {
+      flowStates[flowId]++;
+      updateFlow(flowId);
+    }
+  };
+
+  window.flowPrev = function(flowId) {
+    initFlow(flowId);
+    if (flowStates[flowId] > 0) {
+      flowStates[flowId]--;
+      updateFlow(flowId);
+    }
+  };
+
+  // Initialize flows
+  initFlow('add-note');
+  updateFlow('add-note');
+
+  // ===== GROUP CHAT ANIMATION =====
+  const chatObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const messages = entry.target.querySelectorAll('.chat-message');
+        messages.forEach((msg, i) => {
+          const delay = parseInt(msg.dataset.delay) || i * 600;
+          setTimeout(() => msg.classList.add('show'), delay);
+        });
+        chatObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -5% 0px', threshold: 0.2 });
+
+  document.querySelectorAll('.group-chat').forEach(chat => {
+    chatObserver.observe(chat);
+  });
+
+  // ===== QUIZZES =====
+  document.querySelectorAll('.quiz-option').forEach(option => {
+    option.addEventListener('click', function() {
+      const container = this.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      const isCorrect = this.dataset.correct === 'true';
+
+      // Disable all options
+      options.forEach(o => {
+        if (o !== this) o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+
+      if (!isCorrect) {
+        this.classList.add('incorrect');
+      }
+
+      // Show feedback
+      feedback.textContent = this.dataset.feedback;
+      feedback.className = 'quiz-feedback show ' + (isCorrect ? 'correct-feedback' : 'incorrect-feedback');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

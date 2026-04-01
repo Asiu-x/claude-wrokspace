@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Dashboard Page > displays loading state when API calls are in progress 1`] = `
+<div
+  class="dashboard-page min-h-screen bg-gray-50 p-6"
+  data-testid="dashboard-loading"
+>
+  <div
+    class="flex items-center justify-center h-64"
+  >
+    <div
+      class="text-center"
+    >
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"
+      />
+      <p
+        class="mt-4 text-gray-500"
+      >
+        加载中...
+      </p>
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>售前流程 - 含大模型专家角色</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    padding: 30px;
+    color: #1a1a2e;
+  }
+  .title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+  }
+  .container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow-x: auto;
+    padding: 0;
+  }
+  /* 泳道表格 */
+  .swimlane-table {
+    width: 100%;
+    min-width: 1300px;
+    border-collapse: collapse;
+  }
+  .swimlane-table th,
+  .swimlane-table td {
+    border: 1px solid #e0e0e0;
+    padding: 0;
+    vertical-align: top;
+    position: relative;
+  }
+  /* 顶部分组 header */
+  .group-header {
+    background: #4a5ad3;
+    color: #fff;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 8px;
+    letter-spacing: 2px;
+  }
+  .group-header.market { background: #5b6abf; }
+  .group-header.pipeline { background: #3d4db7; }
+  .group-header.delivery { background: #6e7bd4; }
+  /* 角色 header */
+  .role-header {
+    background: #eef0ff;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 4px;
+    color: #3d4db7;
+  }
+  .role-header.expert {
+    background: #fff3e0;
+    color: #e65100;
+  }
+  /* 阶段列 */
+  .phase-cell {
+    background: #f7f8fc;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a5ad3;
+    text-align: center;
+    padding: 8px 6px;
+    writing-mode: horizontal-tb;
+    min-width: 70px;
+    line-height: 1.5;
+  }
+  /* 内容单元格 */
+  .cell {
+    min-height: 120px;
+    padding: 12px 8px;
+    vertical-align: middle;
+    text-align: center;
+  }
+  /* 节点样式 */
+  .node {
+    display: inline-block;
+    margin: 6px auto;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 160px;
+    position: relative;
+  }
+  .node-rounded {
+    background: #e8eaf6;
+    border: 1.5px solid #7986cb;
+    border-radius: 20px;
+    color: #283593;
+  }
+  .node-rect {
+    background: #e3f2fd;
+    border: 1.5px solid #64b5f6;
+    color: #1565c0;
+    border-radius: 6px;
+  }
+  .node-diamond {
+    background: #fff8e1;
+    border: 1.5px solid #ffb74d;
+    color: #e65100;
+    border-radius: 4px;
+    transform: rotate(0deg);
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .node-expert {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    color: #bf360c;
+    border-radius: 6px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255,152,0,0.2);
+  }
+  .node-expert::before {
+    content: "★ ";
+    color: #ff9800;
+  }
+  .node-output {
+    background: #e8f5e9;
+    border: 1.5px solid #66bb6a;
+    color: #2e7d32;
+    border-radius: 6px;
+    font-size: 11px;
+  }
+  .node-end {
+    background: #fce4ec;
+    border: 1.5px solid #ef9a9a;
+    color: #c62828;
+    border-radius: 20px;
+    font-size: 11px;
+  }
+  .node-start {
+    background: #e0f2f1;
+    border: 1.5px solid #4db6ac;
+    color: #00695c;
+    border-radius: 20px;
+  }
+  /* 箭头连接说明 */
+  .arrow-down {
+    display: block;
+    text-align: center;
+    color: #90a4ae;
+    font-size: 16px;
+    margin: 2px 0;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #999;
+    display: block;
+  }
+  /* 新增标记 */
+  .new-badge {
+    display: inline-block;
+    background: #ff5722;
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+  /* 图例 */
+  .legend {
+    display: flex;
+    gap: 20px;
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+    background: #fafafa;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+  }
+  .legend-box {
+    width: 28px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  /* 连接线提示 */
+  .flow-hint {
+    font-size: 10px;
+    color: #bbb;
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .cell-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    gap: 4px;
+  }
+  /* 跨行提示 */
+  .cross-ref {
+    font-size: 10px;
+    color: #aaa;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="title">学科大模型产线 · 售前流程（含大模型专家角色）</div>
+<div class="subtitle">橙色节点为新增「大模型专家」角色参与环节 &nbsp;|&nbsp; 2026-03</div>
+
+<div class="container">
+<table class="swimlane-table">
+  <!-- 第一行：分组 header -->
+  <colgroup>
+    <col style="width:70px">
+    <col style="width:130px">
+    <col style="width:140px">
+    <col style="width:130px">
+    <col style="width:150px">
+    <col style="width:140px">
+    <col style="width:130px">
+    <col style="width:120px">
+    <col style="width:120px">
+  </colgroup>
+  <thead>
+    <tr>
+      <th class="group-header" rowspan="2" style="background:#7b8bc4;min-width:70px;">阶段</th>
+      <th class="group-header market" colspan="2">市场</th>
+      <th class="group-header pipeline" colspan="4">产线</th>
+      <th class="group-header delivery" colspan="2">交付</th>
+    </tr>
+    <tr>
+      <th class="role-header">客户经理</th>
+      <th class="role-header">售前咨询</th>
+      <th class="role-header">顾问</th>
+      <th class="role-header expert">大模型专家 <span class="new-badge">NEW</span></th>
+      <th class="role-header">产品经理</th>
+      <th class="role-header">交付产研</th>
+      <th class="role-header">项目经理</th>
+      <th class="role-header">研究院</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- ========== 阶段1: 商机初判 ========== -->
+    <tr>
+      <td class="phase-cell">商机<br>初判</td>
+      <!-- 客户经理 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-start">大模型商机<br>初步沟通</div>
+          <span class="arrow-down">↓</span>
+        </div>
+      </td>
+      <!-- 售前咨询 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">一轮宣讲<br><span style="font-size:10px;color:#888;">(心智教育/案例介绍)</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-rect">初步沟通确认<br>项目信息<br><span style="font-size:10px;color:#888;">(产品/时间/需求/预算)</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-diamond">是否标品<br>可满足？</div>
+          <span class="arrow-label">否 →</span>
+        </div>
+      </td>
+      <!-- 顾问 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="cross-ref">← 信息同步</div>
+        </div>
+      </td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">技术可行性快评</div>
+          <div style="font-size:10px;color:#888;margin-top:4px;">10min内出具初判意见</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">《技术快评意见》<br><span style="font-size:10px;">能做/有风险/不建议</span></div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 交付产研 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 项目经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 研究院 -->
+      <td class="cell"><div class="cell-content"></div></td>
+    </tr>
+
+    <!-- ========== 阶段2: 需求澄清 ========== -->
+    <tr>
+      <td class="phase-cell">需求<br>澄清</td>
+      <!-- 客户经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 售前咨询 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 顾问 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">邮件申请<br>产线支持<br><span style="font-size:10px;color:#888;">附项目信息表</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-rect">客户需求<br>沟通会<br><span style="font-size:10px;color:#888;">(内部/外部)</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">需求清单</div>
+        </div>
+      </td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">联合参加<br>客户需求沟通会</div>
+          <div style="font-size:10px;color:#888;margin-top:2px;">技术视角澄清需求边界</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-expert">需求→技术翻译</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">《技术需求说明书》</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-expert">提取共性需求<br>写入需求池</div>
+          <div style="font-size:10px;color:#888;margin-top:2px;">标注频次与优先级</div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-diamond">产线评估<br>是否纳入基线</div>
+          <span class="arrow-label">是 ↓ &nbsp; 否 →</span>
+        </div>
+      </td>
+      <!-- 交付产研 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 项目经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 研究院 -->
+      <td class="cell"><div class="cell-content"></div></td>
+    </tr>
+
+    <!-- ========== 阶段3: 需求评审 ========== -->
+    <tr>
+      <td class="phase-cell">需求<br>评审</td>
+      <!-- 客户经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 售前咨询 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 顾问 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">邮件申请交付<br>产研进行成本<br>与可行性评估</div>
+        </div>
+      </td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">技术可行性评审<br><span style="font-size:10px;font-weight:400;">(必签角色)</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-expert">逐条技术确认</div>
+          <div style="font-size:10px;color:#888;line-height:1.6;margin:4px 0;">
+            标品满足 / 需配置<br>
+            需定制开发 / 不可行
+          </div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-expert">技术方案预设</div>
+          <div style="font-size:10px;color:#888;">Prompt / 微调 / RAG</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">《技术评审意见书》<br><span style="font-size:10px;">含风险等级标注</span></div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">产线研发组<br>评估工期<br><span style="font-size:10px;color:#888;">提供所需材料等</span></div>
+        </div>
+      </td>
+      <!-- 交付产研 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">定制成本及<br>可行性评估</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">输出工程侧<br>成本评估表<br>及所需材料</div>
+        </div>
+      </td>
+      <!-- 项目经理 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">LTC利润率核算</div>
+        </div>
+      </td>
+      <!-- 研究院 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">协助进行技术<br>可行性评估</div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- ========== 阶段3.5: 评审决策 ========== -->
+    <tr>
+      <td class="phase-cell">评审<br>决策</td>
+      <!-- 客户经理 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-end" style="font-size:10px;">不通过：<br>终止定制，<br>引导标品方案</div>
+        </div>
+      </td>
+      <!-- 售前咨询 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 顾问 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">信息整合</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">需求清单、成本评估<br>及报价单</div>
+        </div>
+      </td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">评审会必签确认</div>
+          <div style="font-size:10px;color:#888;margin:4px 0;">技术方案+风险签字</div>
+          <div class="node node-diamond" style="border-color:#ff9800;">发起评审</div>
+          <div style="font-size:10px;color:#888;margin-top:4px;">
+            通过 ↓<br>
+            有条件通过 ↓<br>
+            不通过 ←
+          </div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 交付产研 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 项目经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 研究院 -->
+      <td class="cell"><div class="cell-content"></div></td>
+    </tr>
+
+    <!-- ========== 阶段4: 方案输出 ========== -->
+    <tr>
+      <td class="phase-cell">方案<br>输出与<br>领导<br>审批</td>
+      <!-- 客户经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 售前咨询 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 顾问 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">方案设计<br><span style="font-size:10px;color:#888;">(产品清单/采购/交付成本)</span></div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-output">方案整合定稿</div>
+        </div>
+      </td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">技术方案审核</div>
+          <div style="font-size:10px;color:#888;margin:4px 0;">审核技术承诺合理性<br>防止过度承诺</div>
+          <span class="arrow-down">↓</span>
+          <div class="node node-expert">签署技术确认书</div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 交付产研 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rect">根据最终方案<br>输出交付概算表</div>
+        </div>
+      </td>
+      <!-- 项目经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 研究院 -->
+      <td class="cell"><div class="cell-content"></div></td>
+    </tr>
+
+    <!-- ========== 阶段5: 项目立项 ========== -->
+    <tr>
+      <td class="phase-cell">项目<br>立项<br>评审</td>
+      <!-- 客户经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 售前咨询 -->
+      <td class="cell">
+        <div class="cell-content">
+          <div class="node node-rounded">POMP评审</div>
+        </div>
+      </td>
+      <!-- 顾问 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 大模型专家 ★ -->
+      <td class="cell" style="background:#fffaf0;">
+        <div class="cell-content">
+          <div class="node node-expert">参与立项评审<br>技术答疑</div>
+        </div>
+      </td>
+      <!-- 产品经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 交付产研 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 项目经理 -->
+      <td class="cell"><div class="cell-content"></div></td>
+      <!-- 研究院 -->
+      <td class="cell"><div class="cell-content"></div></td>
+    </tr>
+
+    <!-- ========== 常态化职责 ========== -->
+    <tr>
+      <td class="phase-cell" style="background:#fff3e0;color:#e65100;">常态化<br>职责<br><span class="new-badge">NEW</span></td>
+      <td class="cell" colspan="2"><div class="cell-content"></div></td>
+      <td class="cell"><div class="cell-content"></div></td>
+      <td class="cell" style="background:#fff3e0;" colspan="1">
+        <div class="cell-content" style="padding:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;">
+            <div class="node node-expert" style="max-width:none;font-size:11px;">市场需求池管理<br><span style="font-size:10px;font-weight:400;">月度《需求洞察报告》</span></div>
+            <div class="node node-expert" style="max-width:none;font-size:11px;">技术方案模板库<br><span style="font-size:10px;font-weight:400;">可复用方案沉淀</span></div>
+            <div class="node node-expert" style="max-width:none;font-size:11px;">售前技术赋能<br><span style="font-size:10px;font-weight:400;">定期培训顾问/售前</span></div>
+            <div class="node node-expert" style="max-width:none;font-size:11px;">竞品技术跟踪<br><span style="font-size:10px;font-weight:400;">季度《竞品分析》</span></div>
+          </div>
+        </div>
+      </td>
+      <td class="cell" colspan="4"><div class="cell-content"></div></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 图例 -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-box" style="background:#fff3e0;border:2px solid #ff9800;"></div>大模型专家（新增）</div>
+  <div class="legend-item"><div class="legend-box" style="background:#e3f2fd;border:1.5px solid #64b5f6;"></div>流程节点</div>
+  <div class="legend-item"><div class="legend-box" style="background:#fff8e1;border:1.5px solid #ffb74d;"></div>判断节点</div>
+  <div class="legend-item"><div class="legend-box" style="background:#e8f5e9;border:1.5px solid #66bb6a;"></div>输出产物</div>
+  <div class="legend-item"><div class="legend-box" style="background:#e0f2f1;border:1.5px solid #4db6ac;border-radius:10px;"></div>起始节点</div>
+  <div class="legend-item"><div class="legend-box" style="background:#fce4ec;border:1.5px solid #ef9a9a;border-radius:10px;"></div>终止节点</div>
+</div>
+</div>
+
+</body>
+</html>

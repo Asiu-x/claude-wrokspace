@@ -27,3 +27,14 @@ npm-debug.log*
 # 缓存
 .cache/
 .turbo/
+
+# 嵌套 git 仓库（作为子模块或独立管理）
+A-mem/
+.claude/skills/codebase-to-course/
+
+# Vite 缓存
+.vite/
+
+# Python 缓存
+__pycache__/
+*.pyc
