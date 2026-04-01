@@ -709,17 +709,17 @@ const Home: React.FC = () => {
                           onClick={() => navigate(`/cases/${caseItem.id}`)}
                         >
                           {/* 校徽 */}
-                          <div className="w-20 h-20 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-3 shadow-sm transition-shadow group-hover:shadow-md group-hover:border-violet-200">
+                          <div className="w-24 h-24 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-3 shadow-sm transition-all group-hover:shadow-md group-hover:border-violet-200 group-hover:scale-105 overflow-hidden">
                             {caseItem.logoUrl ? (
-                              <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-12 h-12 object-contain" />
+                              <img src={caseItem.logoUrl} alt={caseItem.university || ''} className="w-16 h-16 object-contain" />
                             ) : (
-                              <Building2 className="h-8 w-8 text-violet-400 group-hover:text-violet-500 transition-colors" />
+                              <Building2 className="h-10 w-10 text-violet-400 group-hover:text-violet-500 transition-colors" />
                             )}
                           </div>
                           {/* 高校名 */}
                           <div className="text-sm font-bold text-zinc-800 text-center truncate w-full">{caseItem.university || caseItem.organization}</div>
                           {/* 案例名 */}
-                          <div className="text-xs text-zinc-400 text-center mt-1 line-clamp-2 leading-snug px-1">{caseItem.title}</div>
+                          <div className="text-[11px] text-zinc-400 text-center mt-1 line-clamp-2 leading-snug px-1">{caseItem.title}</div>
                         </motion.div>
                       ))}
                     </motion.div>
