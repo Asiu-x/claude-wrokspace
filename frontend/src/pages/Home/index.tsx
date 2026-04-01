@@ -223,12 +223,10 @@ const Home: React.FC = () => {
   const casesScrollRef = useRef<HTMLDivElement>(null);
   const [spotlightIdx, setSpotlightIdx] = useState(0);
   const [hoveredModel, setHoveredModel] = useState<number | null>(null);
-  const [orbitTime, setOrbitTime] = useState(0);
+  const [orbitTime, setOrbitTime] = useState(() => Date.now() / 1000);
   useEffect(() => {
-    let raf: number;
-    const tick = () => { setOrbitTime(Date.now() / 1000); raf = requestAnimationFrame(tick); };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const timer = setInterval(() => setOrbitTime(Date.now() / 1000), 100);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
