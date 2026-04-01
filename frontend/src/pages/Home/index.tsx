@@ -222,6 +222,7 @@ const Home: React.FC = () => {
   const [recommendedModels, setRecommendedModels] = useState<ModelItem[]>([]);
   const casesScrollRef = useRef<HTMLDivElement>(null);
   const [spotlightIdx, setSpotlightIdx] = useState(0);
+  const [hoveredModel, setHoveredModel] = useState<number | null>(null);
 
   useEffect(() => {
     DashboardAPI.getFeaturedCases(8).then((res) => {
