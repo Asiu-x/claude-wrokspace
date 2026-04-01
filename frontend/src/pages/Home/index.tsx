@@ -998,7 +998,7 @@ const Home: React.FC = () => {
                           const left = 50 + (Math.cos(rad) * orbit.r / 1200) * 100;
                           const top = 50 + (Math.sin(rad) * orbit.r / 1200) * 100;
                           const isHovered = hoveredModel === flatIdx;
-                          const dotSize = [14, 12, 10, 9][oi];
+                          const dotSize = [14, 12, 11, 10, 9][oi];
 
                           return (
                             <motion.div
