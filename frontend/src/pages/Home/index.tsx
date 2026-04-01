@@ -667,10 +667,10 @@ const Home: React.FC = () => {
         </section>
 
         {/* 高校合作案例 - Spotlight Gallery */}
-        <section className="py-28 bg-white overflow-hidden">
+        <section className="py-28 bg-zinc-50/60 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4">
             <motion.div
-              className="text-center mb-16"
+              className="text-center mb-20"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
@@ -691,16 +691,15 @@ const Home: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {/* 景深舞台 */}
-              <div className="relative flex items-center justify-center" style={{ height: 380 }}>
+              <div className="relative flex items-center justify-center" style={{ height: 400 }}>
                 {/* 左右渐变遮罩 */}
                 <div className="absolute inset-0 z-20 pointer-events-none" style={{
-                  background: 'linear-gradient(to right, white 0%, transparent 12%, transparent 88%, white 100%)',
+                  background: 'linear-gradient(to right, rgb(250 250 250 / 0.9) 0%, transparent 15%, transparent 85%, rgb(250 250 250 / 0.9) 100%)',
                 }} />
 
                 {/* 卡片层 */}
                 {featuredCases.map((caseItem, idx) => {
                   const total = featuredCases.length;
-                  // 相对主角的偏移（循环）
                   let diff = idx - spotlightIdx;
                   if (diff > total / 2) diff -= total;
                   if (diff < -total / 2) diff += total;
@@ -709,83 +708,91 @@ const Home: React.FC = () => {
 
                   if (!isVisible) return null;
 
+                  // 从标题中提取模型名（取第一个空格前的部分或全部）
+                  const titleParts = caseItem.title.split(/\s+/);
+                  const modelName = titleParts[0];
+                  const subtitle = titleParts.slice(1).join(' ');
+
                   return (
                     <motion.div
                       key={caseItem.id}
-                      className="absolute cursor-pointer"
-                      style={{ width: 620, zIndex: 10 - Math.abs(diff) }}
+                      className="absolute"
+                      style={{ width: 640, zIndex: 10 - Math.abs(diff) }}
                       animate={{
-                        x: diff * 420,
+                        x: diff * 440,
                         scale: isActive ? 1 : 0.82,
-                        opacity: isActive ? 1 : Math.abs(diff) === 1 ? 0.45 : 0.15,
+                        opacity: isActive ? 1 : Math.abs(diff) === 1 ? 0.4 : 0.12,
                       }}
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      onClick={() => {
-                        if (!isActive) setSpotlightIdx(idx);
-                        else navigate(`/cases/${caseItem.id}`);
-                      }}
                     >
-                      {/* 卡片 */}
+                      {/* 主角卡片背后的氛围光斑 */}
+                      {isActive && (
+                        <div className="absolute -inset-10 -z-10 pointer-events-none">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-indigo-300/20 blur-[80px]" />
+                        </div>
+                      )}
+
                       <div
-                        className={`relative w-full aspect-[3/2] rounded-[2rem] bg-white border overflow-hidden ${isActive ? 'border-zinc-200/60' : 'border-zinc-100'}`}
+                        className={`relative w-full aspect-[3/2] rounded-[2rem] bg-white overflow-hidden cursor-pointer group ${isActive ? 'border border-zinc-200/50' : 'border border-zinc-100/40'}`}
                         style={{
                           boxShadow: isActive
-                            ? '0 25px 60px -12px rgba(0,0,0,0.12), 0 4px 20px -4px rgba(0,0,0,0.06)'
-                            : '0 4px 12px rgba(0,0,0,0.04)',
+                            ? '0 20px 50px -12px rgba(0,0,0,0.05)'
+                            : '0 2px 8px rgba(0,0,0,0.02)',
+                        }}
+                        onClick={() => {
+                          if (!isActive) setSpotlightIdx(idx);
+                          else navigate(`/cases/${caseItem.id}`);
                         }}
                       >
-                        {/* 非活跃白色蒙版 */}
+                        {/* 非活跃蒙版 */}
                         {!isActive && (
-                          <div className="absolute inset-0 bg-white/50 z-10 rounded-[2rem]" />
+                          <div className="absolute inset-0 bg-white/60 z-10" />
                         )}
 
                         <div className="relative z-0 h-full p-8 md:p-10 flex flex-col justify-between">
-                          {/* 顶部：Logo + 标签 */}
+                          {/* 顶行：Logo + 学科 + 标签 */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-zinc-50 border border-zinc-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                                 {caseItem.logoUrl ? (
                                   <img src={caseItem.logoUrl} alt="" className="w-7 h-7 object-contain" />
                                 ) : (
-                                  <Building2 className="h-4 w-4 text-zinc-400" />
+                                  <Building2 className="h-4 w-4 text-zinc-300" />
                                 )}
                               </div>
-                              <span className="text-sm text-zinc-400 font-medium">{caseItem.subjects?.join(' · ') || '学科案例'}</span>
+                              <span className="text-[13px] text-zinc-400 font-medium tracking-wide">{caseItem.subjects?.join(' · ') || '学科案例'}</span>
                             </div>
                             {caseItem.universityLevel && (
-                              <span className={`text-[11px] px-3 py-1 rounded-full font-bold backdrop-blur-sm ${
+                              <span className={`text-[11px] px-3 py-1 rounded-full font-bold ${
                                 caseItem.universityLevel === '985'
-                                  ? 'bg-violet-50/80 text-violet-600'
+                                  ? 'bg-violet-50 text-violet-500'
                                   : caseItem.universityLevel === '211'
-                                  ? 'bg-blue-50/80 text-blue-600'
-                                  : 'bg-zinc-100/80 text-zinc-500'
+                                  ? 'bg-blue-50 text-blue-500'
+                                  : 'bg-zinc-50 text-zinc-400'
                               }`}>
                                 {caseItem.universityLevel}
                               </span>
                             )}
                           </div>
 
-                          {/* 中部：大标题 */}
+                          {/* 主标题区 - 主次分明 */}
                           <div>
-                            <h3 className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 leading-tight mb-2 line-clamp-2">
-                              {caseItem.title}
+                            <h3 className="hero-gradient-text-light text-4xl md:text-[2.75rem] font-black tracking-tight leading-[1.1] mb-2">
+                              {modelName}
                             </h3>
-                            <p className="text-sm text-zinc-400 line-clamp-2 leading-relaxed max-w-md">{caseItem.summary}</p>
+                            {subtitle && (
+                              <p className="text-lg font-medium text-zinc-400 leading-snug">{subtitle}</p>
+                            )}
                           </div>
 
-                          {/* 底部：高校名 + 了解更多 */}
+                          {/* 底行：高校名 + 幽灵按钮 */}
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-zinc-500">{caseItem.university || caseItem.organization}</span>
-                            {isActive && (
-                              <motion.span
-                                className="text-sm font-medium text-indigo-500 inline-flex items-center gap-1.5 opacity-0 group-hover:opacity-100"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.7 }}
-                                whileHover={{ opacity: 1, x: 2 }}
-                              >
-                                了解更多 <ArrowRight className="h-3.5 w-3.5" />
-                              </motion.span>
-                            )}
+                            <span className="text-[13px] font-medium text-zinc-400">{caseItem.university || caseItem.organization}</span>
+                            <span
+                              className="text-[13px] font-medium text-zinc-400 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-600"
+                            >
+                              了解更多 <ArrowRight className="h-3.5 w-3.5" />
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -794,15 +801,15 @@ const Home: React.FC = () => {
                 })}
               </div>
 
-              {/* 导航圆点 */}
-              <div className="flex items-center justify-center gap-2 mt-8">
+              {/* 导航点 - 极简缩小 */}
+              <div className="flex items-center justify-center gap-1.5 mt-10">
                 {featuredCases.map((_, idx) => (
                   <button
                     key={idx}
                     className={`rounded-full transition-all duration-300 ${
                       idx === spotlightIdx
-                        ? 'w-8 h-2.5 bg-indigo-500'
-                        : 'w-2.5 h-2.5 bg-zinc-200 hover:bg-zinc-300'
+                        ? 'w-5 h-1.5 bg-zinc-900'
+                        : 'w-1.5 h-1.5 bg-zinc-300 hover:bg-zinc-400'
                     }`}
                     onClick={() => setSpotlightIdx(idx)}
                   />
@@ -811,7 +818,7 @@ const Home: React.FC = () => {
             </motion.div>
           ) : (
             <div className="flex justify-center">
-              <div className="w-[620px] aspect-[3/2] bg-zinc-50 rounded-[2rem] animate-pulse" />
+              <div className="w-[640px] aspect-[3/2] bg-zinc-100 rounded-[2rem] animate-pulse" />
             </div>
           )}
         </section>
