@@ -918,58 +918,52 @@ const Home: React.FC = () => {
               {recommendedModels.length > 0 ? (() => {
                 const allModels = recommendedModels.slice(0, 12);
                 const orbitRadii = [120, 195, 275, 360];
-                // 星尘数据：每层轨道上的微点数量
-                const dustCounts = [6, 10, 14, 18];
-                // 4 张主卡的精确位置（左上、右上、右下、左下），卡在特定轨道上
-                const heroPositions = [
-                  { orbit: 1, angle: 225, label: '左上' }, // 中圈左上
-                  { orbit: 2, angle: 45, label: '右上' },  // 外圈右上
-                  { orbit: 2, angle: 315, label: '左下' }, // 外圈左下
-                  { orbit: 3, angle: 135, label: '右下' }, // 最外圈右下
+                // 每层分配模型星辰
+                const layers = [
+                  allModels.slice(0, 2),
+                  allModels.slice(2, 5),
+                  allModels.slice(5, 9),
+                  allModels.slice(9, 12),
                 ];
-
-                // 生成星尘种子（固定角度，避免与主卡重叠）
-                const dustSeeds = orbitRadii.map((r, oi) => {
-                  const heroAnglesOnThisOrbit = heroPositions.filter(h => h.orbit === oi).map(h => h.angle);
-                  const points: number[] = [];
-                  for (let d = 0; d < dustCounts[oi]; d++) {
-                    let angle = (d / dustCounts[oi]) * 360;
-                    // 避开主卡 ±20°
-                    const tooClose = heroAnglesOnThisOrbit.some(ha => Math.abs(angle - ha) < 25 || Math.abs(angle - ha + 360) < 25 || Math.abs(angle - ha - 360) < 25);
-                    if (!tooClose) points.push(angle);
-                  }
-                  return points;
+                const layerAngles = layers.map((l, oi) =>
+                  l.map((_, i) => (i / l.length) * 360 + [45, 30, 20, 50][oi])
+                );
+                // 背景星尘
+                const bgDust = orbitRadii.flatMap((r, oi) => {
+                  const count = 8 + oi * 5;
+                  return Array.from({ length: count }, (_, di) => ({
+                    angle: (di / count) * 360 + di * 7.3,
+                    r, oi, di,
+                    size: 1 + (di % 3) * 0.5,
+                    baseOpacity: 0.08 + (di % 4) * 0.05,
+                  }));
                 });
 
                 return (
-                  <div className="relative mx-auto" style={{ width: '100%', maxWidth: 900, aspectRatio: '1/1' }}>
-                    {/* SVG 底层：轨道 + 脉冲 + 星尘 */}
+                  <div
+                    className="relative mx-auto"
+                    style={{ width: '100%', maxWidth: 900, aspectRatio: '1/1' }}
+                    onMouseLeave={() => setHoveredModel(null)}
+                  >
+                    {/* SVG 底层 */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 900">
-                      {/* 虚线轨道 */}
                       {orbitRadii.map((r, oi) => (
-                        <circle key={`orbit-${oi}`} cx="450" cy="450" r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.5" />
+                        <circle key={`o-${oi}`} cx="450" cy="450" r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.4" />
                       ))}
-
-                      {/* 中心脉冲光晕 */}
                       {[0, 1, 2].map(ring => (
-                        <circle key={`glow-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1.5 - ring * 0.3}>
-                          <animate attributeName="r" values={`${40 + ring * 10};${90 + ring * 30}`} dur={`${3 + ring * 0.5}s`} begin={`${ring * 1}s`} repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="0.2;0" dur={`${3 + ring * 0.5}s`} begin={`${ring * 1}s`} repeatCount="indefinite" />
+                        <circle key={`p-${ring}`} cx="450" cy="450" fill="none" stroke="#6366f1" strokeWidth={1.2 - ring * 0.2}>
+                          <animate attributeName="r" values={`${35 + ring * 10};${80 + ring * 25}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.2;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
                       ))}
-
-                      {/* 星尘微点 - 每层旋转 */}
                       {orbitRadii.map((r, oi) => (
-                        <g key={`dust-group-${oi}`}>
-                          <animateTransform attributeName="transform" type="rotate" from={`0 450 450`} to={`360 450 450`} dur={`${100 + oi * 30}s`} repeatCount="indefinite" />
-                          {dustSeeds[oi].map((angle, di) => {
-                            const rad = (angle * Math.PI) / 180;
-                            const x = 450 + Math.cos(rad) * r;
-                            const y = 450 + Math.sin(rad) * r;
-                            const size = 1.5 + Math.random() * 1.5;
+                        <g key={`dg-${oi}`}>
+                          <animateTransform attributeName="transform" type="rotate" from="0 450 450" to="360 450 450" dur={`${120 + oi * 40}s`} repeatCount="indefinite" />
+                          {bgDust.filter(d => d.oi === oi).map((d) => {
+                            const rad = (d.angle * Math.PI) / 180;
                             return (
-                              <circle key={`dust-${oi}-${di}`} cx={x} cy={y} r={size} fill="#a5b4fc" opacity={0.2 + Math.random() * 0.25}>
-                                <animate attributeName="opacity" values={`${0.15};${0.4};${0.15}`} dur={`${3 + di * 0.3}s`} repeatCount="indefinite" />
+                              <circle key={`bd-${d.oi}-${d.di}`} cx={450 + Math.cos(rad) * d.r} cy={450 + Math.sin(rad) * d.r} r={d.size} fill="#a5b4fc" opacity={d.baseOpacity}>
+                                <animate attributeName="opacity" values={`${d.baseOpacity};${d.baseOpacity + 0.2};${d.baseOpacity}`} dur={`${3 + d.di * 0.2}s`} repeatCount="indefinite" />
                               </circle>
                             );
                           })}
@@ -977,17 +971,16 @@ const Home: React.FC = () => {
                       ))}
                     </svg>
 
-                    {/* 绝对中心：超大数字 */}
+                    {/* 中心数字 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center">
-                      {/* 背景柔光 */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full bg-indigo-200/20 blur-[60px]" />
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] h-[120px] rounded-full bg-violet-300/15 blur-[40px]" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] rounded-full bg-indigo-200/20 blur-[60px]" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full bg-violet-300/15 blur-[40px]" />
                       <motion.div
                         className="relative"
                         initial={{ opacity: 0, scale: 0.8 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
                       >
                         <div className="text-6xl md:text-7xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-600 to-purple-800 bg-clip-text text-transparent">
                           {counts.models}+
@@ -996,48 +989,89 @@ const Home: React.FC = () => {
                       </motion.div>
                     </div>
 
-                    {/* 4 张主角卡片 - 精准卡在轨道上 */}
-                    {heroModels.map((model, i) => {
-                      const pos = heroPositions[i];
-                      const r = orbitRadii[pos.orbit];
-                      const rad = (pos.angle * Math.PI) / 180;
+                    {/* 12 个模型星辰节点 */}
+                    {layers.map((layer, oi) => layer.map((model, mi) => {
+                      const flatIdx = layers.slice(0, oi).reduce((s, l) => s + l.length, 0) + mi;
+                      const r = orbitRadii[oi];
+                      const angle = layerAngles[oi][mi];
+                      const rad = (angle * Math.PI) / 180;
                       const leftPct = ((450 + Math.cos(rad) * r) / 900) * 100;
                       const topPct = ((450 + Math.sin(rad) * r) / 900) * 100;
+                      const isHovered = hoveredModel === flatIdx;
+                      const dotSize = [7, 6, 5, 4][oi];
 
                       return (
-                        <motion.div
+                        <div
                           key={model.id}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer group"
+                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
                           style={{ left: `${leftPct}%`, top: `${topPct}%` }}
-                          initial={{ opacity: 0, scale: 0.6 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.3 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                          whileHover={{ scale: 1.06, y: -4 }}
-                          onClick={() => navigate(`/models/${model.id}`)}
+                          onMouseEnter={() => setHoveredModel(flatIdx)}
+                          onMouseLeave={() => setHoveredModel(null)}
                         >
-                          <div className="w-[200px] p-5 rounded-2xl border border-zinc-200 bg-white/90 backdrop-blur-md transition-all duration-300 group-hover:border-indigo-300 group-hover:shadow-xl group-hover:shadow-indigo-100/30" style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06)' }}>
-                            {/* 模型名 */}
-                            <div className="mb-2" style={{ fontFamily: "'Inter', system-ui" }}>
-                              <span className="text-[15px] font-black tracking-tight text-zinc-900">{model.name}</span>
-                            </div>
-                            {/* 描述 */}
-                            <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{model.description}</p>
-                            {/* 参数 + 来源 + 评分 */}
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
-                              {model.source && (
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
-                              )}
-                              <span className="ml-auto flex items-center gap-0.5">
-                                <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                                <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1)}</span>
-                              </span>
-                            </div>
-                          </div>
-                        </motion.div>
+                          <motion.div
+                            className="cursor-pointer relative"
+                            animate={{ scale: isHovered ? 1.8 : 1 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                            onClick={() => navigate(`/models/${model.id}`)}
+                          >
+                            <div
+                              className={`rounded-full transition-all duration-300 ${isHovered ? 'bg-indigo-500 shadow-lg shadow-indigo-400/40' : 'bg-indigo-400/70'}`}
+                              style={{ width: dotSize * 2, height: dotSize * 2 }}
+                            />
+                            {isHovered && (
+                              <div
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                                style={{ width: dotSize * 6, height: dotSize * 6, background: 'radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%)' }}
+                              />
+                            )}
+                            {!isHovered && (
+                              <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap" style={{ top: dotSize * 2 + 6, fontFamily: "'Inter', system-ui" }}>
+                                <span className="text-[10px] font-bold text-zinc-400">{model.name}</span>
+                              </div>
+                            )}
+                          </motion.div>
+
+                          <AnimatePresence>
+                            {isHovered && (
+                              <motion.div
+                                className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
+                                style={{
+                                  left: leftPct > 50 ? 'auto' : '100%',
+                                  right: leftPct > 50 ? '100%' : 'auto',
+                                  top: '50%', transform: 'translateY(-50%)',
+                                  marginLeft: leftPct > 50 ? 0 : 12,
+                                  marginRight: leftPct > 50 ? 12 : 0,
+                                  boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
+                                }}
+                                initial={{ opacity: 0, scale: 0.9, x: leftPct > 50 ? 8 : -8 }}
+                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{model.name}</div>
+                                <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{model.description}</p>
+                                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
+                                  {model.source && (
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
+                                  )}
+                                  <span className="text-[9px] text-zinc-400 font-medium">{model.framework}</span>
+                                </div>
+                                <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
+                                  <div className="flex items-center gap-0.5">
+                                    <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                                    <span className="text-[10px] text-zinc-500 font-bold">{model.rating?.toFixed(1)}</span>
+                                  </div>
+                                  <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
+                                    查看详情 <ArrowRight className="h-2.5 w-2.5" />
+                                  </span>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       );
-                    })}
+                    }))}
                   </div>
                 );
               })() : (
