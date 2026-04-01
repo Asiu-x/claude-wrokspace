@@ -995,8 +995,8 @@ const Home: React.FC = () => {
                           const flatIdx = orbitModels.slice(0, oi).reduce((s, o) => s + o.models.length, 0) + mi;
                           const angle = (mi / orbit.count) * 360 + [0, 20, 10, 30][oi];
                           const rad = (angle * Math.PI) / 180;
-                          const left = 50 + (Math.cos(rad) * orbit.r / 900) * 100;
-                          const top = 50 + (Math.sin(rad) * orbit.r / 900) * 100;
+                          const left = 50 + (Math.cos(rad) * orbit.r / 1200) * 100;
+                          const top = 50 + (Math.sin(rad) * orbit.r / 1200) * 100;
                           const isHovered = hoveredModel === flatIdx;
                           const dotSize = [14, 12, 10, 9][oi];
 
