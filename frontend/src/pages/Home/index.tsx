@@ -916,30 +916,29 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
             >
               {recommendedModels.length > 0 ? (() => {
+                // 用全部 12 个模型铺满，每个都是可交互星辰
                 const allModels = recommendedModels.slice(0, 12);
-                const orbitRadii = [120, 195, 275, 360];
-                // 每层分配模型星辰
-                const layers = [
-                  allModels.slice(0, 2),
-                  allModels.slice(2, 5),
-                  allModels.slice(5, 9),
-                  allModels.slice(9, 12),
-                ];
-                const layerAngles = layers.map((l, oi) =>
-                  l.map((_, i) => (i / l.length) * 360 + [45, 30, 20, 50][oi])
-                );
-                // 密集星尘 - 铺满整个区域（不仅限于轨道）
-                const denseStars: { x: number; y: number; size: number; opacity: number; dur: number }[] = [];
-                for (let i = 0; i < 200; i++) {
-                  // 在整个 900x900 区域随机分布，但中心 80px 内留空
-                  const angle = (i / 200) * Math.PI * 2 + i * 2.39996; // 黄金角
-                  const dist = 60 + Math.sqrt(i / 200) * 390; // 从中心向外渐密
-                  denseStars.push({
-                    x: 450 + Math.cos(angle) * dist,
-                    y: 450 + Math.sin(angle) * dist,
-                    size: 0.8 + (i % 5) * 0.4,
-                    opacity: 0.06 + (i % 7) * 0.03,
-                    dur: 3 + (i % 11) * 0.5,
+                // 黄金角螺旋分布，铺满整个区域
+                const modelPositions = allModels.map((_, i) => {
+                  const goldenAngle = i * 2.39996;
+                  const dist = 80 + Math.sqrt(i / allModels.length) * 340;
+                  return {
+                    x: ((450 + Math.cos(goldenAngle) * dist) / 900) * 100,
+                    y: ((450 + Math.sin(goldenAngle) * dist) / 900) * 100,
+                    size: 8 - Math.floor(i / 3), // 内大外小 8→5
+                  };
+                });
+                // 装饰星尘
+                const bgStars: { x: number; y: number; s: number; o: number; d: number }[] = [];
+                for (let i = 0; i < 150; i++) {
+                  const a = i * 2.39996 + 1.5;
+                  const dist = 30 + Math.sqrt(i / 150) * 430;
+                  bgStars.push({
+                    x: 450 + Math.cos(a) * dist,
+                    y: 450 + Math.sin(a) * dist,
+                    s: 0.6 + (i % 4) * 0.3,
+                    o: 0.04 + (i % 6) * 0.02,
+                    d: 3 + (i % 9) * 0.4,
                   });
                 }
 
