@@ -916,9 +916,8 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
             >
               {recommendedModels.length > 0 ? (() => {
-                const heroModels = recommendedModels.slice(0, 4);
-                // 4 层轨道半径（基于 900x900 视口，中心 450,450）
-                const orbitRadii = [130, 210, 300, 390];
+                const allModels = recommendedModels.slice(0, 12);
+                const orbitRadii = [120, 195, 275, 360];
                 // 星尘数据：每层轨道上的微点数量
                 const dustCounts = [6, 10, 14, 18];
                 // 4 张主卡的精确位置（左上、右上、右下、左下），卡在特定轨道上
