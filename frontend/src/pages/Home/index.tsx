@@ -892,8 +892,8 @@ const Home: React.FC = () => {
           );
         })()}
 
-        {/* 模型生态 - Circuit Board 拓扑 */}
-        <section className="py-28 px-4 bg-white overflow-hidden">
+        {/* 模型生态 - 同心圆行星轨道 */}
+        <section className="py-28 px-4 bg-[#FCFCFC] overflow-hidden">
           <div className="container mx-auto max-w-6xl">
             <motion.div
               className="text-center mb-14"
@@ -916,140 +916,184 @@ const Home: React.FC = () => {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
               {recommendedModels.length > 0 ? (() => {
-                // 节点布局：中心 + 左4右4
-                const nodes = recommendedModels.slice(0, 8);
-                const cx = 500, cy = 280; // 中心坐标（基于 1000x560 视口）
-                const positions = [
-                  // 左侧 4 个
-                  { x: 80, y: 80 }, { x: 100, y: 240 }, { x: 80, y: 400 }, { x: 260, y: 470 },
-                  // 右侧 4 个
-                  { x: 740, y: 470 }, { x: 920, y: 400 }, { x: 900, y: 240 }, { x: 920, y: 80 },
+                const models8 = recommendedModels.slice(0, 8);
+                // 3 层轨道：内圈 r=140, 中圈 r=220, 外圈 r=290（基于 700x700 视口中心 350,350）
+                const orbits = [
+                  { r: 140, models: models8.slice(0, 2), speed: 90, angles: [0, 180] },
+                  { r: 220, models: models8.slice(2, 5), speed: 120, angles: [30, 150, 270] },
+                  { r: 290, models: models8.slice(5, 8), speed: 160, angles: [60, 180, 300] },
                 ];
-
-                // 生成正交折线路径（从中心到节点）
-                const getPath = (nx: number, ny: number) => {
-                  const midX = nx < cx ? cx - 60 : cx + 60;
-                  return `M ${cx} ${cy} H ${midX} V ${ny} H ${nx}`;
-                };
+                const hasHover = hoveredModel !== null;
 
                 return (
-                  <div className="relative rounded-3xl overflow-hidden bg-grid-zinc" style={{
-                    maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 50%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 50%, transparent 100%)',
-                  }}>
-                    <svg viewBox="0 0 1000 560" className="w-full" style={{ minHeight: 480 }}>
+                  <div
+                    className="relative mx-auto"
+                    style={{ width: '100%', maxWidth: 700, aspectRatio: '1/1' }}
+                    onMouseLeave={() => setHoveredModel(null)}
+                  >
+                    {/* 同心圆轨道 SVG */}
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 700 700">
                       <defs>
-                        {/* 流光渐变 */}
-                        {nodes.map((_, i) => (
-                          <linearGradient key={`grad-${i}`} id={`flow-grad-${i}`} gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
-                            <stop offset="40%" stopColor="#6366f1" stopOpacity="0.6" />
-                            <stop offset="60%" stopColor="#818cf8" stopOpacity="0.8" />
-                            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                          </linearGradient>
-                        ))}
+                        <linearGradient id="laser-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+                          <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.2" />
+                        </linearGradient>
                       </defs>
 
-                      {/* 正交折线连线 */}
-                      {nodes.map((_, i) => {
-                        const p = positions[i];
-                        const d = getPath(p.x, p.y);
-                        const pathLen = Math.abs(cx - p.x) + Math.abs(cy - p.y) + 60;
-                        return (
-                          <g key={`line-${i}`}>
-                            {/* 底线 */}
-                            <path d={d} fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" />
-                            {/* 流光 */}
-                            <path d={d} fill="none" stroke={`url(#flow-grad-${i})`} strokeWidth="2" strokeLinecap="round"
-                              strokeDasharray={`${pathLen * 0.15} ${pathLen * 0.85}`}
-                            >
-                              <animate
-                                attributeName="stroke-dashoffset"
-                                values={`${pathLen};${-pathLen * 0.15}`}
-                                dur={`${2.5 + i * 0.4}s`}
-                                repeatCount="indefinite"
-                              />
-                            </path>
-                          </g>
-                        );
-                      })}
+                      {/* 虚线轨道 */}
+                      {orbits.map((orbit, oi) => (
+                        <circle
+                          key={`orbit-${oi}`}
+                          cx="350" cy="350" r={orbit.r}
+                          fill="none" stroke="#e4e4e7" strokeWidth="1"
+                          strokeDasharray="6 6"
+                          style={{
+                            opacity: hasHover ? 0.2 : 0.5,
+                            transition: 'opacity 0.5s ease',
+                          }}
+                        />
+                      ))}
 
-                      {/* 中心枢纽 */}
-                      {/* 脉冲波纹 */}
+                      {/* Hover 激光射线 */}
+                      {hoveredModel !== null && (() => {
+                        // 找到 hover 的模型在哪个轨道哪个角度
+                        let hx = 350, hy = 350;
+                        let flatIdx = 0;
+                        for (const orbit of orbits) {
+                          for (let mi = 0; mi < orbit.models.length; mi++) {
+                            if (flatIdx === hoveredModel) {
+                              const angle = (orbit.angles[mi] * Math.PI) / 180;
+                              hx = 350 + Math.cos(angle) * orbit.r;
+                              hy = 350 + Math.sin(angle) * orbit.r;
+                            }
+                            flatIdx++;
+                          }
+                        }
+                        return (
+                          <line x1="350" y1="350" x2={hx} y2={hy} stroke="url(#laser-grad)" strokeWidth="2" strokeLinecap="round">
+                            <animate attributeName="opacity" values="0;1" dur="0.3s" fill="freeze" />
+                          </line>
+                        );
+                      })()}
+
+                      {/* 中心脉冲波纹 */}
                       {[0, 1, 2].map(ring => (
-                        <circle key={`pulse-${ring}`} cx={cx} cy={cy} fill="none" stroke="#6366f1" strokeWidth="1">
-                          <animate attributeName="r" values="28;60" dur="3s" begin={`${ring * 1}s`} repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="0.3;0" dur="3s" begin={`${ring * 1}s`} repeatCount="indefinite" />
+                        <circle key={`pulse-${ring}`} cx="350" cy="350" fill="none" stroke="#6366f1" strokeWidth="1">
+                          <animate attributeName="r" values="24;50" dur="3s" begin={`${ring}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.25;0" dur="3s" begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
                       ))}
-                      {/* 核心圆 - 玻璃质感 */}
-                      <circle cx={cx} cy={cy} r="32" fill="url(#core-gradient)" />
-                      <circle cx={cx} cy={cy} r="32" fill="none" stroke="white" strokeWidth="1" opacity="0.3" />
-                      <circle cx={cx} cy={cy} r="28" fill="none" stroke="white" strokeWidth="0.5" opacity="0.15" />
-                      {/* 核心渐变 */}
+
+                      {/* 中心核心 */}
                       <defs>
-                        <radialGradient id="core-gradient" cx="45%" cy="40%">
-                          <stop offset="0%" stopColor="#818cf8" />
-                          <stop offset="60%" stopColor="#6366f1" />
-                          <stop offset="100%" stopColor="#4f46e5" />
+                        <radialGradient id="core-grad" cx="42%" cy="38%">
+                          <stop offset="0%" stopColor="#a5b4fc" />
+                          <stop offset="50%" stopColor="#6366f1" />
+                          <stop offset="100%" stopColor="#4338ca" />
                         </radialGradient>
                       </defs>
-                      {/* 核心图标文字 */}
-                      <text x={cx} y={cy - 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="800" fontFamily="Inter, system-ui">AI</text>
-                      <text x={cx} y={cy + 10} textAnchor="middle" fill="white" fontSize="8" fontWeight="500" opacity="0.7" fontFamily="Inter, system-ui">模型中心</text>
-
-                      {/* 节点连接端点小圆 */}
-                      {nodes.map((_, i) => {
-                        const p = positions[i];
-                        return <circle key={`dot-${i}`} cx={p.x} cy={p.y} r="3" fill="#e4e4e7" />;
-                      })}
+                      <circle cx="350" cy="350" r="30" fill="url(#core-grad)" />
+                      <circle cx="350" cy="350" r="30" fill="none" stroke="white" strokeWidth="1" opacity="0.25" />
+                      <text x="350" y="347" textAnchor="middle" fill="white" fontSize="12" fontWeight="800" fontFamily="Inter, system-ui">AI</text>
+                      <text x="350" y="360" textAnchor="middle" fill="white" fontSize="7" fontWeight="500" opacity="0.6" fontFamily="Inter, system-ui">模型中心</text>
                     </svg>
 
-                    {/* 模型卡片 - HTML 叠加在 SVG 上 */}
-                    <div className="absolute inset-0" style={{ pointerEvents: 'none' }}>
-                      {nodes.map((model, i) => {
-                        const p = positions[i];
-                        // 转换为百分比
-                        const leftPct = (p.x / 1000) * 100;
-                        const topPct = (p.y / 560) * 100;
-                        return (
-                          <motion.div
-                            key={model.id}
-                            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                            style={{ left: `${leftPct}%`, top: `${topPct}%`, pointerEvents: 'auto' }}
-                            initial={{ opacity: 0, scale: 0.6 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.2 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                            whileHover={{ scale: 1.08, y: -4 }}
-                            onClick={() => navigate(`/models/${model.id}`)}
-                          >
-                            <div className="w-[150px] p-3 rounded-xl border border-zinc-200 bg-white transition-all duration-200 group-hover:border-indigo-300 group-hover:shadow-lg group-hover:shadow-indigo-100/40" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                              <div className="mb-1.5" style={{ fontFamily: "'Inter', system-ui" }}>
-                                <span className="text-[12px] font-black tracking-tight text-zinc-800">{model.name}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
-                                {model.source && (
-                                  <span className={`text-[8px] px-1 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                    {/* 轨道旋转层 + 模型节点 */}
+                    {orbits.map((orbit, oi) => (
+                      <motion.div
+                        key={`orbit-layer-${oi}`}
+                        className="absolute inset-0"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: orbit.speed, repeat: Infinity, ease: 'linear' }}
+                      >
+                        {orbit.models.map((model, mi) => {
+                          const flatIdx = (oi === 0 ? 0 : oi === 1 ? 2 : 5) + mi;
+                          const angle = (orbit.angles[mi] * Math.PI) / 180;
+                          const x = 50 + (Math.cos(angle) * orbit.r / 700) * 100;
+                          const y = 50 + (Math.sin(angle) * orbit.r / 700) * 100;
+                          const isHovered = hoveredModel === flatIdx;
+                          const isFaded = hasHover && !isHovered;
+                          // 节点大小：外圈小，内圈大
+                          const size = oi === 0 ? 'w-[140px]' : oi === 1 ? 'w-[130px]' : 'w-[120px]';
 
-                      {/* 中心枢纽标签 */}
-                      <div className="absolute" style={{ left: '50%', top: `${(cy / 560) * 100}%`, transform: 'translate(-50%, 44px)' }}>
-                        <div className="text-center">
-                          <div className="text-sm font-bold text-zinc-900">{counts.models} 个模型</div>
-                        </div>
-                      </div>
+                          return (
+                            <motion.div
+                              key={model.id}
+                              className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                              style={{
+                                left: `${x}%`,
+                                top: `${y}%`,
+                                // 反向旋转保持卡片水平
+                                rotate: 0,
+                              }}
+                              animate={{
+                                rotate: -360,
+                                opacity: isFaded ? 0.25 : 1,
+                                scale: isHovered ? 1.12 : 1,
+                              }}
+                              transition={{
+                                rotate: { duration: orbit.speed, repeat: Infinity, ease: 'linear' },
+                                opacity: { duration: 0.4 },
+                                scale: { type: 'spring', stiffness: 300, damping: 20 },
+                              }}
+                              onMouseEnter={() => setHoveredModel(flatIdx)}
+                              onClick={() => navigate(`/models/${model.id}`)}
+                            >
+                              <div className={`${size} p-3 rounded-xl border bg-white transition-all duration-300 ${isHovered ? 'border-indigo-400 shadow-lg shadow-indigo-200/30' : 'border-zinc-200 shadow-sm'}`}>
+                                <div className="mb-1" style={{ fontFamily: "'Inter', system-ui" }}>
+                                  <span className="text-[12px] font-black tracking-tight text-zinc-800">{model.name}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{model.parameters}</span>
+                                  {model.source && (
+                                    <span className={`text-[8px] px-1 py-0.5 rounded font-semibold ${model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{model.source}</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Hover 悬浮面板 */}
+                              <AnimatePresence>
+                                {isHovered && (
+                                  <motion.div
+                                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-[200px] p-4 rounded-xl border border-zinc-200/60 bg-white/90 backdrop-blur-lg z-50"
+                                    style={{ boxShadow: '0 8px 30px -4px rgba(0,0,0,0.08)', top: '100%' }}
+                                    initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <div className="text-xs text-zinc-500 mb-2 line-clamp-2">{model.description}</div>
+                                    <div className="flex items-center justify-between text-[10px]">
+                                      <span className="text-zinc-400">{model.framework}</span>
+                                      <div className="flex items-center gap-0.5">
+                                        <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+                                        <span className="text-zinc-500 font-bold">{model.rating?.toFixed(1)}</span>
+                                      </div>
+                                    </div>
+                                    <div className="mt-2 pt-2 border-t border-zinc-100">
+                                      <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
+                                        查看详情 <ArrowRight className="h-2.5 w-2.5" />
+                                      </span>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    ))}
+
+                    {/* 中心标签 */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-10 pointer-events-none">
+                      <div className="text-sm font-bold text-zinc-900 text-center">{counts.models} 个模型</div>
                     </div>
                   </div>
                 );
               })() : (
-                <div className="h-[480px] bg-zinc-50 rounded-3xl animate-pulse" />
+                <div className="mx-auto" style={{ width: '100%', maxWidth: 700, aspectRatio: '1/1' }}>
+                  <div className="w-full h-full bg-zinc-50 rounded-full animate-pulse" />
+                </div>
               )}
 
               {/* 底部入口 */}
