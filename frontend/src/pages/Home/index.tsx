@@ -223,6 +223,13 @@ const Home: React.FC = () => {
   const casesScrollRef = useRef<HTMLDivElement>(null);
   const [spotlightIdx, setSpotlightIdx] = useState(0);
   const [hoveredModel, setHoveredModel] = useState<number | null>(null);
+  const [orbitTime, setOrbitTime] = useState(0);
+  useEffect(() => {
+    let raf: number;
+    const tick = () => { setOrbitTime(Date.now() / 1000); raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   useEffect(() => {
     DashboardAPI.getFeaturedCases(8).then((res) => {
