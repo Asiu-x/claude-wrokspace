@@ -947,10 +947,10 @@ const Home: React.FC = () => {
                   return { ...cfg, models: slice };
                 });
                 // 背景星尘
-                const bgStars = Array.from({ length: 120 }, (_, i) => {
+                const bgStars = Array.from({ length: 160 }, (_, i) => {
                   const a = i * 2.39996 + 0.7;
-                  const d = 40 + Math.sqrt(i / 120) * 420;
-                  return { x: 450 + Math.cos(a) * d, y: 450 + Math.sin(a) * d, s: 0.5 + (i % 4) * 0.3, o: 0.04 + (i % 5) * 0.015 };
+                  const d = 40 + Math.sqrt(i / 160) * 560;
+                  return { x: 600 + Math.cos(a) * d, y: 600 + Math.sin(a) * d, s: 0.5 + (i % 4) * 0.3, o: 0.04 + (i % 5) * 0.015 };
                 });
 
                 return (
