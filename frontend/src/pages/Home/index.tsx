@@ -936,18 +936,33 @@ const Home: React.FC = () => {
                 const orbits = [110, 200, 300, 410, 520];
                 // 每层分配节点数
                 const layerCounts = [2, 4, 5, 5, 4];
-                // 分配模型到各轨道
-                let idx = 0;
-                const orbitModels = orbitConfig.map(cfg => {
-                  const slice = models20.slice(idx, idx + cfg.count);
-                  idx += cfg.count;
-                  return { ...cfg, models: slice };
+                // 分配模型到各层并计算固定位置
+                let nodeIdx = 0;
+                const allNodes = orbits.flatMap((r, oi) => {
+                  const count = layerCounts[oi];
+                  const nodes = [];
+                  for (let mi = 0; mi < count && nodeIdx < models20.length; mi++) {
+                    const angle = (mi / count) * 360 + [0, 22, 12, 35, 8][oi];
+                    const rad = (angle * Math.PI) / 180;
+                    nodes.push({
+                      model: models20[nodeIdx],
+                      flatIdx: nodeIdx,
+                      x: C + Math.cos(rad) * r,
+                      y: C + Math.sin(rad) * r,
+                      leftPct: ((C + Math.cos(rad) * r) / VB) * 100,
+                      topPct: ((C + Math.sin(rad) * r) / VB) * 100,
+                      dotSize: [14, 12, 11, 10, 9][oi],
+                      orbitR: r,
+                    });
+                    nodeIdx++;
+                  }
+                  return nodes;
                 });
                 // 背景星尘
-                const bgStars = Array.from({ length: 160 }, (_, i) => {
+                const bgStars = Array.from({ length: 140 }, (_, i) => {
                   const a = i * 2.39996 + 0.7;
-                  const d = 40 + Math.sqrt(i / 160) * 560;
-                  return { x: 600 + Math.cos(a) * d, y: 600 + Math.sin(a) * d, s: 0.5 + (i % 4) * 0.3, o: 0.04 + (i % 5) * 0.015 };
+                  const d = 30 + Math.sqrt(i / 140) * 560;
+                  return { x: C + Math.cos(a) * d, y: C + Math.sin(a) * d, s: 0.5 + (i % 4) * 0.3, o: 0.03 + (i % 5) * 0.015 };
                 });
 
                 return (
