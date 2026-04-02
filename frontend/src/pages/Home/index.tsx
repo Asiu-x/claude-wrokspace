@@ -1055,11 +1055,14 @@ const Home: React.FC = () => {
                           <AnimatePresence>
                             {isHovered && (
                               <motion.div
-                                className="fixed w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white backdrop-blur-xl"
+                                className="absolute w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white backdrop-blur-xl"
                                 style={{
                                   zIndex: 9999,
                                   boxShadow: '0 12px 40px -6px rgba(0,0,0,0.15)',
-                                  pointerEvents: 'auto',
+                                  left: n.leftPct > 50 ? 'auto' : 'calc(50% + 20px)',
+                                  right: n.leftPct > 50 ? 'calc(50% + 20px)' : 'auto',
+                                  top: n.topPct > 50 ? 'auto' : 'calc(50% + 16px)',
+                                  bottom: n.topPct > 50 ? 'calc(50% + 16px)' : 'auto',
                                 }}
                                 initial={{ opacity: 0, scale: 0.92 }}
                                 animate={{ opacity: 1, scale: 1 }}
