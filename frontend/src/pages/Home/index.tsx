@@ -932,81 +932,66 @@ const Home: React.FC = () => {
               {recommendedModels.length > 0 ? (() => {
                 const allModelsData = recommendedModels.slice(0, 100);
                 const VBW = 1600; const VBH = 1000; const CX = VBW / 2; const CY = VBH / 2;
-                // 8 层椭圆轨道，垂直半径不超过 VBH/2 - 30 = 470
-                const orbits = [140, 195, 250, 300, 345, 385, 420, 455];
-                const orbitStretch = 1.55; // 加大横向拉伸，补偿纵向缩小
-                // 每层分配节点数（总计 100）
-                const layerCounts = [8, 10, 12, 13, 14, 15, 15, 13];
-                // 分配模型到各层并计算固定位置
-                // 使用黄金角（137.508°）作为层间偏移，确保相邻层不对齐
-                const GOLDEN_ANGLE = 137.508;
-                let nodeIdx = 0;
-                const allNodes = orbits.flatMap((r, oi) => {
-                  const count = layerCounts[oi];
-                  const nodes = [];
-                  for (let mi = 0; mi < count && nodeIdx < allModelsData.length; mi++) {
-                    // 每层均匀分布 + 黄金角层间偏移，确保整体散布均匀
-                    const angle = (mi / count) * 360 + oi * GOLDEN_ANGLE;
-                    const rad = (angle * Math.PI) / 180;
-                    const px = CX + Math.cos(rad) * r * orbitStretch;
-                    const py = CY + Math.sin(rad) * r;
-                    nodes.push({
-                      model: allModelsData[nodeIdx],
-                      flatIdx: nodeIdx,
-                      x: px,
-                      y: py,
-                      leftPct: (px / VBW) * 100,
-                      topPct: (py / VBH) * 100,
-                      dotSize: Math.max(4, 10 - oi * 0.6),
-                      orbitR: r,
-                    });
-                    nodeIdx++;
-                  }
-                  return nodes;
+                const orbits = [160, 220, 280, 335, 385, 430, 470];
+                const stretch = 1.55;
+                const GA = 137.508;
+
+                // 5 个 Hero 模型 — 大卡片，锚定在不同轨道
+                const heroIdxMap = [0, 1, 2, 3, 4];
+                const heroOrbitIdx = [1, 3, 5, 2, 4];
+                const heroAngles = [35, 195, 315, 125, 260];
+                const heroNodes = heroIdxMap.map((mi, i) => {
+                  const model = allModelsData[mi];
+                  const r = orbits[heroOrbitIdx[i]];
+                  const rad = (heroAngles[i] * Math.PI) / 180;
+                  const px = CX + Math.cos(rad) * r * stretch;
+                  const py = CY + Math.sin(rad) * r;
+                  return { model, i, x: px, y: py, leftPct: (px / VBW) * 100, topPct: (py / VBH) * 100, r };
                 });
-                // 背景星尘
-                const bgStars = Array.from({ length: 60 }, (_, i) => {
-                  const a = i * 2.39996 + 0.7;
-                  const d = 40 + Math.sqrt(i / 60) * 450;
-                  return { x: CX + Math.cos(a) * d * orbitStretch, y: CY + Math.sin(a) * d, s: 0.4 + (i % 3) * 0.2, o: 0.03 + (i % 4) * 0.01 };
-                });
+
+                // 背景微光点（无文字，60 个）
+                const bgDots: { x: number; y: number; sz: number; op: number }[] = [];
+                for (let i = 0; i < 60; i++) {
+                  const oi = i % orbits.length;
+                  const r = orbits[oi];
+                  const angle = (i / 60) * 360 + oi * GA + 11;
+                  const rad = (angle * Math.PI) / 180;
+                  const px = CX + Math.cos(rad) * r * stretch;
+                  const py = CY + Math.sin(rad) * r;
+                  // 跳过太靠近 hero 的
+                  const nearHero = heroNodes.some(h => Math.hypot(px - h.x, py - h.y) < 60);
+                  if (nearHero) continue;
+                  bgDots.push({ x: px, y: py, sz: 1.2 + (i % 4) * 0.5, op: 0.12 + (i % 5) * 0.05 });
+                }
 
                 return (
                   <div
                     className="relative mx-auto"
-                    style={{ width: '110vw', maxWidth: 1600, marginLeft: '-5vw', aspectRatio: '16/10' }}
+                    style={{
+                      width: '110vw', maxWidth: 1600, marginLeft: '-5vw', aspectRatio: '16/10',
+                      maskImage: 'radial-gradient(ellipse 85% 90% at 50% 50%, white 40%, transparent 75%)',
+                      WebkitMaskImage: 'radial-gradient(ellipse 85% 90% at 50% 50%, white 40%, transparent 75%)',
+                    }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
-                    {/* SVG：星尘 + 同心圆轨道 + 辐射连线 */}
+                    {/* SVG：虚线轨道 + 背景微光点 + 脉冲 */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${VBW} ${VBH}`}>
-                      {/* 星尘 */}
-                      {bgStars.map((s, i) => (
-                        <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
-                      ))}
                       {/* 同心椭圆虚线轨道 */}
                       {orbits.map((r, i) => (
-                        <ellipse key={`orb-${i}`} cx={CX} cy={CY} rx={r * orbitStretch} ry={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
+                        <ellipse key={`orb-${i}`} cx={CX} cy={CY} rx={r * stretch} ry={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.3" />
                       ))}
-                      {/* 中心到每个节点的辐射连线 - 常驻显示 */}
-                      {allNodes.map((n, i) => (
-                        <line key={`ray-${i}`} x1={CX} y1={CY} x2={n.x} y2={n.y}
-                          stroke="#a5b4fc" strokeWidth="0.8" opacity="0.35"
-                        />
+                      {/* 背景微光点 — 无文字 */}
+                      {bgDots.map((d, i) => (
+                        <circle key={`bg-${i}`} cx={d.x} cy={d.y} r={d.sz} fill="#818cf8" opacity={d.op}>
+                          <animate attributeName="opacity" values={`${d.op};${d.op + 0.15};${d.op}`} dur={`${3 + (i % 7) * 0.4}s`} repeatCount="indefinite" />
+                        </circle>
                       ))}
                       {/* 中心脉冲 */}
                       {[0, 1, 2].map(ring => (
                         <circle key={`p-${ring}`} cx={CX} cy={CY} fill="none" stroke="#6366f1" strokeWidth={1}>
                           <animate attributeName="r" values={`${30 + ring * 8};${70 + ring * 20}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.12;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
-                      ))}
-                      {/* 节点圆点 */}
-                      {allNodes.map((n, i) => (
-                        <circle key={`dot-${i}`} cx={n.x} cy={n.y}
-                          r={hoveredModel === n.flatIdx ? n.dotSize / 2 * 1.8 : n.dotSize / 2}
-                          fill={hoveredModel === n.flatIdx ? '#6366f1' : 'rgba(99,102,241,0.6)'}
-                          style={{ transition: 'all 0.3s ease' }}
-                        />
                       ))}
                     </svg>
 
