@@ -981,13 +981,10 @@ const Home: React.FC = () => {
                       {orbits.map((r, i) => (
                         <circle key={`orb-${i}`} cx={C} cy={C} r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
                       ))}
-                      {/* 中心到每个节点的辐射连线 */}
+                      {/* 中心到每个节点的辐射连线 - 常驻显示 */}
                       {allNodes.map((n, i) => (
                         <line key={`ray-${i}`} x1={C} y1={C} x2={n.x} y2={n.y}
-                          stroke={hoveredModel === n.flatIdx ? '#6366f1' : '#e4e4e7'}
-                          strokeWidth={hoveredModel === n.flatIdx ? 1.5 : 0.5}
-                          opacity={hoveredModel === n.flatIdx ? 0.6 : 0.2}
-                          style={{ transition: 'all 0.3s ease' }}
+                          stroke="#c7d2fe" strokeWidth="1" opacity="0.5"
                         />
                       ))}
                       {/* 中心脉冲 */}
