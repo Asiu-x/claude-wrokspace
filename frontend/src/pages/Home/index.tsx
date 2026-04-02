@@ -932,9 +932,9 @@ const Home: React.FC = () => {
               {recommendedModels.length > 0 ? (() => {
                 const allModelsData = recommendedModels.slice(0, 100);
                 const VBW = 1600; const VBH = 1000; const CX = VBW / 2; const CY = VBH / 2;
-                // 8 层椭圆轨道（中心留空，从 200 起步）
-                const orbits = [200, 270, 340, 400, 460, 520, 580, 640];
-                const orbitStretch = 1.35;
+                // 8 层椭圆轨道，垂直半径不超过 VBH/2 - 30 = 470
+                const orbits = [140, 195, 250, 300, 345, 385, 420, 455];
+                const orbitStretch = 1.55; // 加大横向拉伸，补偿纵向缩小
                 // 每层分配节点数（总计 100）
                 const layerCounts = [8, 10, 12, 13, 14, 15, 15, 13];
                 // 分配模型到各层并计算固定位置
