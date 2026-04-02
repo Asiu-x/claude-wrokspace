@@ -931,10 +931,11 @@ const Home: React.FC = () => {
             >
               {recommendedModels.length > 0 ? (() => {
                 const allModelsData = recommendedModels.slice(0, 100);
-                const VB = 1200; const C = VB / 2;
-                // 10 层同心圆轨道，从中心向外扩散
-                const orbits = [80, 140, 200, 260, 320, 380, 430, 475, 515, 555];
-                // 每层分配节点数（内少外多）
+                const VBW = 1600; const VBH = 1000; const CX = VBW / 2; const CY = VBH / 2;
+                // 10 层椭圆轨道（横向拉伸），间距加大
+                const orbits = [70, 135, 210, 285, 360, 430, 500, 565, 625, 680];
+                const orbitStretch = 1.35; // 横向拉伸系数
+                // 每层分配节点数
                 const layerCounts = [3, 5, 7, 9, 11, 13, 14, 14, 13, 11];
                 // 分配模型到各层并计算固定位置
                 let nodeIdx = 0;
