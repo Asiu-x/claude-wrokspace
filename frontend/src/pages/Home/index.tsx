@@ -949,19 +949,24 @@ const Home: React.FC = () => {
                   return { model, i, x: px, y: py, leftPct: (px / VBW) * 100, topPct: (py / VBH) * 100, r };
                 });
 
-                // 背景微光点（无文字，60 个）
-                const bgDots: { x: number; y: number; sz: number; op: number }[] = [];
-                for (let i = 0; i < 60; i++) {
-                  const oi = i % orbits.length;
-                  const r = orbits[oi];
-                  const angle = (i / 60) * 360 + oi * GA + 11;
-                  const rad = (angle * Math.PI) / 180;
-                  const px = CX + Math.cos(rad) * r * stretch;
-                  const py = CY + Math.sin(rad) * r;
-                  // 跳过太靠近 hero 的
-                  const nearHero = heroNodes.some(h => Math.hypot(px - h.x, py - h.y) < 60);
+                // 150+ 密集星河粒子（无文字，纯色块）
+                const starDust: { x: number; y: number; sz: number; op: number }[] = [];
+                for (let i = 0; i < 180; i++) {
+                  // 在轨道带内随机分布（r: 120 ~ 480）
+                  const rBase = 120 + (i * GA * 0.7) % 360;
+                  const angleJitter = i * GA + (i % 3) * 40;
+                  const rad = (angleJitter * Math.PI) / 180;
+                  const px = CX + Math.cos(rad) * rBase * stretch;
+                  const py = CY + Math.sin(rad) * rBase;
+                  // 跳过中心区和太靠近 hero 的
+                  if (Math.hypot(px - CX, py - CY) < 100) continue;
+                  const nearHero = heroNodes.some(h => Math.hypot(px - h.x, py - h.y) < 55);
                   if (nearHero) continue;
-                  bgDots.push({ x: px, y: py, sz: 1.2 + (i % 4) * 0.5, op: 0.12 + (i % 5) * 0.05 });
+                  starDust.push({
+                    x: px, y: py,
+                    sz: 0.8 + (i % 5) * 0.7,   // 1px ~ 4px
+                    op: 0.08 + (i % 8) * 0.06,  // 8% ~ 56%
+                  });
                 }
 
                 return (
