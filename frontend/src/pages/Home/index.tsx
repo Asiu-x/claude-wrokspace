@@ -907,7 +907,7 @@ const Home: React.FC = () => {
         })()}
 
         {/* 模型生态 - 辐射网状 */}
-        <section className="py-28 px-4 bg-[#FCFCFC] overflow-clip">
+        <section className="py-28 px-4 bg-[#FCFCFC]" style={{ overflow: 'visible' }}>
           <div className="container mx-auto max-w-7xl">
             <motion.div
               className="text-center mb-6"
