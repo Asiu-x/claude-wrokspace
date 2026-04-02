@@ -969,7 +969,7 @@ const Home: React.FC = () => {
                 return (
                   <div
                     className="relative mx-auto"
-                    style={{ width: '100%', maxWidth: 1100, aspectRatio: '1/1' }}
+                    style={{ width: '110vw', maxWidth: 1600, marginLeft: '-5vw', aspectRatio: '16/10' }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
                     {/* SVG：星尘 + 同心圆轨道 + 辐射连线 */}
