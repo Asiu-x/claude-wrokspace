@@ -946,13 +946,15 @@ const Home: React.FC = () => {
                     const angleOffset = oi * 17; // 每层错开
                     const angle = (mi / count) * 360 + angleOffset;
                     const rad = (angle * Math.PI) / 180;
+                    const px = CX + Math.cos(rad) * r * orbitStretch;
+                    const py = CY + Math.sin(rad) * r;
                     nodes.push({
                       model: allModelsData[nodeIdx],
                       flatIdx: nodeIdx,
-                      x: C + Math.cos(rad) * r,
-                      y: C + Math.sin(rad) * r,
-                      leftPct: ((C + Math.cos(rad) * r) / VB) * 100,
-                      topPct: ((C + Math.sin(rad) * r) / VB) * 100,
+                      x: px,
+                      y: py,
+                      leftPct: (px / VBW) * 100,
+                      topPct: (py / VBH) * 100,
                       dotSize: Math.max(4, 10 - oi * 0.6),
                       orbitR: r,
                     });
