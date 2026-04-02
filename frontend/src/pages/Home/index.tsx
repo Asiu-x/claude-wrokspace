@@ -993,7 +993,7 @@ const Home: React.FC = () => {
                       ))}
                       {/* 中心脉冲 */}
                       {[0, 1, 2].map(ring => (
-                        <circle key={`p-${ring}`} cx={C} cy={C} fill="none" stroke="#6366f1" strokeWidth={1}>
+                        <circle key={`p-${ring}`} cx={CX} cy={CY} fill="none" stroke="#6366f1" strokeWidth={1}>
                           <animate attributeName="r" values={`${30 + ring * 8};${70 + ring * 20}`} dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                           <animate attributeName="opacity" values="0.15;0" dur={`${3 + ring * 0.5}s`} begin={`${ring}s`} repeatCount="indefinite" />
                         </circle>
