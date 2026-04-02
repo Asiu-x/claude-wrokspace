@@ -1022,30 +1022,26 @@ const Home: React.FC = () => {
                     {/* 100 个固定位置可交互节点 */}
                     {allNodes.map((n) => {
                       const isHovered = hoveredModel === n.flatIdx;
-                      // 中心区域（内 2 层轨道）不放交互触发区，避免遮挡数字
-                      const isInnerOrbit = n.orbitR <= orbits[1];
                       return (
                         <div
                           key={`node-${n.flatIdx}`}
-                          className={`absolute z-10 ${isInnerOrbit ? 'pointer-events-none' : ''}`}
+                          className="absolute z-10"
                           style={{ left: `${n.leftPct}%`, top: `${n.topPct}%`, transform: 'translate(-50%, -50%)' }}
-                          onMouseEnter={isInnerOrbit ? undefined : () => setHoveredModel(n.flatIdx)}
-                          onMouseLeave={isInnerOrbit ? undefined : () => setHoveredModel(null)}
+                          onMouseEnter={() => setHoveredModel(n.flatIdx)}
+                          onMouseLeave={() => setHoveredModel(null)}
                         >
-                          {/* 透明 hover 触发区 - 居中对齐圆点 */}
-                          {!isInnerOrbit && (
-                            <div
-                              className="absolute cursor-pointer"
-                              style={{
-                                width: n.dotSize * 4,
-                                height: n.dotSize * 4,
-                                left: '50%',
-                                top: '50%',
-                                transform: 'translate(-50%, -50%)',
-                              }}
-                              onClick={() => navigate(`/models/${n.model.id}`)}
-                            />
-                          )}
+                          {/* 透明 hover 触发区 */}
+                          <div
+                            className="absolute cursor-pointer"
+                            style={{
+                              width: n.dotSize * 4,
+                              height: n.dotSize * 4,
+                              left: '50%',
+                              top: '50%',
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                            onClick={() => navigate(`/models/${n.model.id}`)}
+                          />
                           {/* 名称标签 - 紧贴圆点下方 */}
                           <div
                             className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
