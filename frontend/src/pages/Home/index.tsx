@@ -941,8 +941,9 @@ const Home: React.FC = () => {
                 const allNodes = orbits.flatMap((r, oi) => {
                   const count = layerCounts[oi];
                   const nodes = [];
-                  for (let mi = 0; mi < count && nodeIdx < models20.length; mi++) {
-                    const angle = (mi / count) * 360 + [0, 22, 12, 35, 8][oi];
+                  for (let mi = 0; mi < count && nodeIdx < allModelsData.length; mi++) {
+                    const angleOffset = oi * 17; // 每层错开
+                    const angle = (mi / count) * 360 + angleOffset;
                     const rad = (angle * Math.PI) / 180;
                     nodes.push({
                       model: models20[nodeIdx],
