@@ -713,7 +713,7 @@ export const generateMockQuickAccess = (): QuickAccessResponse => {
 
 // ==================== 预生成的Mock数据 ====================
 
-export const MOCK_MODELS = generateMockModels(12);
+export const MOCK_MODELS = generateMockModels(100);
 export const MOCK_DATASETS = generateMockDatasets(10);
 export const MOCK_CASES = generateMockCases(6);
 export const MOCK_CAPABILITIES = generateMockCapabilities(16);
