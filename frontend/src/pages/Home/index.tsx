@@ -946,13 +946,13 @@ const Home: React.FC = () => {
                     const angle = (mi / count) * 360 + angleOffset;
                     const rad = (angle * Math.PI) / 180;
                     nodes.push({
-                      model: models20[nodeIdx],
+                      model: allModelsData[nodeIdx],
                       flatIdx: nodeIdx,
                       x: C + Math.cos(rad) * r,
                       y: C + Math.sin(rad) * r,
                       leftPct: ((C + Math.cos(rad) * r) / VB) * 100,
                       topPct: ((C + Math.sin(rad) * r) / VB) * 100,
-                      dotSize: [14, 12, 11, 10, 9][oi],
+                      dotSize: Math.max(4, 10 - oi * 0.6),
                       orbitR: r,
                     });
                     nodeIdx++;
