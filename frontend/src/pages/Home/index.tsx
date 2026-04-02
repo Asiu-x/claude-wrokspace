@@ -985,7 +985,7 @@ const Home: React.FC = () => {
                       {/* 中心到每个节点的辐射连线 - 常驻显示 */}
                       {allNodes.map((n, i) => (
                         <line key={`ray-${i}`} x1={C} y1={C} x2={n.x} y2={n.y}
-                          stroke="#c7d2fe" strokeWidth="1" opacity="0.5"
+                          stroke="#c7d2fe" strokeWidth="0.5" opacity="0.25"
                         />
                       ))}
                       {/* 中心脉冲 */}
