@@ -965,7 +965,7 @@ const Home: React.FC = () => {
                 // 背景星尘
                 const bgStars = Array.from({ length: 60 }, (_, i) => {
                   const a = i * 2.39996 + 0.7;
-                  const d = 50 + Math.sqrt(i / 60) * 680;
+                  const d = 40 + Math.sqrt(i / 60) * 450;
                   return { x: CX + Math.cos(a) * d * orbitStretch, y: CY + Math.sin(a) * d, s: 0.4 + (i % 3) * 0.2, o: 0.03 + (i % 4) * 0.01 };
                 });
 
