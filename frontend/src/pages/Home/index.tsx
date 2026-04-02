@@ -1006,7 +1006,7 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 100 个固定位置可交互节点 */}
+                    {/* 5 个 Hero 卡片 + 弹窗 */}
                     {allNodes.map((n) => {
                       const isHovered = hoveredModel === n.flatIdx;
                       return (
