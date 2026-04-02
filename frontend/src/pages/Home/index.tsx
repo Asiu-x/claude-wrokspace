@@ -1065,7 +1065,7 @@ const Home: React.FC = () => {
                           onMouseLeave={() => setHoveredModel(null)}
                           onClick={() => navigate(`/models/${h.model.id}`)}
                         >
-                          <div className={`w-[170px] p-4 rounded-2xl bg-white/90 backdrop-blur-md border transition-all duration-300 ${isHovered ? 'border-indigo-300 shadow-xl shadow-indigo-100/30' : 'border-zinc-200/80 shadow-md shadow-zinc-200/30'}`}>
+                          <div className={`w-[175px] p-4 rounded-2xl bg-white/80 backdrop-blur-xl border transition-all duration-300 ${isHovered ? 'border-indigo-300 shadow-2xl shadow-indigo-200/40' : 'border-zinc-200/60 shadow-xl shadow-zinc-300/25'}`}>
                             <div className="text-[14px] font-black text-zinc-900 mb-1 tracking-tight" style={{ fontFamily: "'Inter', system-ui" }}>{h.model.name}</div>
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{h.model.parameters}</span>
