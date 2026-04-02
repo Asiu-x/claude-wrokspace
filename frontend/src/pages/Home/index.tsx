@@ -1027,8 +1027,8 @@ const Home: React.FC = () => {
                       return (
                         <div
                           key={`node-${n.flatIdx}`}
-                          className="absolute z-10"
-                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%`, transform: 'translate(-50%, -50%)' }}
+                          className="absolute"
+                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%`, transform: 'translate(-50%, -50%)', zIndex: isHovered ? 9999 : 10 }}
                           onMouseEnter={() => setHoveredModel(n.flatIdx)}
                           onMouseLeave={() => setHoveredModel(null)}
                         >
