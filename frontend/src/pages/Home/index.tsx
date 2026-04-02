@@ -930,12 +930,12 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
             >
               {recommendedModels.length > 0 ? (() => {
-                const models20 = recommendedModels.slice(0, 20);
+                const allModelsData = recommendedModels.slice(0, 100);
                 const VB = 1200; const C = VB / 2;
-                // 5 层同心圆轨道
-                const orbits = [110, 200, 300, 410, 520];
-                // 每层分配节点数
-                const layerCounts = [2, 4, 5, 5, 4];
+                // 10 层同心圆轨道，从中心向外扩散
+                const orbits = [80, 140, 200, 260, 320, 380, 430, 475, 515, 555];
+                // 每层分配节点数（内少外多）
+                const layerCounts = [3, 5, 7, 9, 11, 13, 14, 14, 13, 11];
                 // 分配模型到各层并计算固定位置
                 let nodeIdx = 0;
                 const allNodes = orbits.flatMap((r, oi) => {
