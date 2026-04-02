@@ -932,11 +932,11 @@ const Home: React.FC = () => {
               {recommendedModels.length > 0 ? (() => {
                 const allModelsData = recommendedModels.slice(0, 100);
                 const VBW = 1600; const VBH = 1000; const CX = VBW / 2; const CY = VBH / 2;
-                // 10 层椭圆轨道（横向拉伸），间距加大
-                const orbits = [70, 135, 210, 285, 360, 430, 500, 565, 625, 680];
-                const orbitStretch = 1.35; // 横向拉伸系数
-                // 每层分配节点数
-                const layerCounts = [3, 5, 7, 9, 11, 13, 14, 14, 13, 11];
+                // 8 层椭圆轨道（中心留空，从 200 起步）
+                const orbits = [200, 270, 340, 400, 460, 520, 580, 640];
+                const orbitStretch = 1.35;
+                // 每层分配节点数（总计 100）
+                const layerCounts = [8, 10, 12, 13, 14, 15, 15, 13];
                 // 分配模型到各层并计算固定位置
                 let nodeIdx = 0;
                 const allNodes = orbits.flatMap((r, oi) => {
