@@ -1015,7 +1015,70 @@ const Home: React.FC = () => {
                       <div className="text-sm text-zinc-300/50 font-medium mt-2 tracking-wide">接入生态模型</div>
                     </div>
 
-                    {/* SVG 旋转轨道上的点（纯视觉） */}
+                    {/* 20 个固定位置可交互节点 */}
+                    {allNodes.map((n) => {
+                      const isHovered = hoveredModel === n.flatIdx;
+                      return (
+                        <div
+                          key={`node-${n.flatIdx}`}
+                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%` }}
+                          onMouseEnter={() => setHoveredModel(n.flatIdx)}
+                          onMouseLeave={() => setHoveredModel(null)}
+                        >
+                          <div className="cursor-pointer relative"
+                            style={{ width: n.dotSize * 3, height: n.dotSize * 3, marginLeft: -n.dotSize * 1.5, marginTop: -n.dotSize * 1.5 }}
+                            onClick={() => navigate(`/models/${n.model.id}`)}
+                          />
+                          <div className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
+                            style={{ top: n.dotSize / 2 + 6, fontFamily: "'Inter', system-ui" }}>
+                            <span className="text-[10px] font-bold text-zinc-400">{n.model.name}</span>
+                          </div>
+                          <AnimatePresence>
+                            {isHovered && (
+                              <motion.div
+                                className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
+                                style={{
+                                  left: n.leftPct > 50 ? 'auto' : '100%',
+                                  right: n.leftPct > 50 ? '100%' : 'auto',
+                                  top: '50%', transform: 'translateY(-50%)',
+                                  marginLeft: n.leftPct > 50 ? 0 : 14,
+                                  marginRight: n.leftPct > 50 ? 14 : 0,
+                                  boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
+                                }}
+                                initial={{ opacity: 0, scale: 0.92 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.92 }}
+                                transition={{ duration: 0.2 }}
+                                onMouseEnter={() => setHoveredModel(n.flatIdx)}
+                                onMouseLeave={() => setHoveredModel(null)}
+                                onClick={(e) => { e.stopPropagation(); navigate(`/models/${n.model.id}`); }}
+                              >
+                                <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{n.model.name}</div>
+                                <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{n.model.description}</p>
+                                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{n.model.parameters}</span>
+                                  {n.model.source && (
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-semibold ${n.model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{n.model.source}</span>
+                                  )}
+                                  <span className="text-[9px] text-zinc-400">{n.model.framework}</span>
+                                </div>
+                                <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
+                                  <div className="flex items-center gap-0.5">
+                                    <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                                    <span className="text-[10px] text-zinc-500 font-bold">{n.model.rating?.toFixed(1)}</span>
+                                  </div>
+                                  <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
+                                    查看详情 <ArrowRight className="h-2.5 w-2.5" />
+                                  </span>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
+                    {/* 已废弃的旋转层 - 删除 */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1200">
                       {orbitModels.map((orbit, oi) => (
                         <g key={`rot-${oi}`}>
