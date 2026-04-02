@@ -1085,7 +1085,7 @@ const Home: React.FC = () => {
                   </div>
                 );
               })() : (
-                <div className="mx-auto" style={{ width: '100%', maxWidth: 1200, aspectRatio: '1/1' }}>
+                <div className="mx-auto" style={{ width: '110vw', maxWidth: 1600, marginLeft: '-5vw', aspectRatio: '16/10' }}>
                   <div className="w-full h-full bg-zinc-50 rounded-full animate-pulse" />
                 </div>
               )}
