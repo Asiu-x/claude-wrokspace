@@ -230,9 +230,9 @@ const Home: React.FC = () => {
       setFeaturedCases(list);
     }).catch((err) => { console.warn('获取精选案例失败:', err); });
 
-    // 从模型库获取 20 个模型
+    // 从模型库获取 100 个模型
     import('../../services/modelService').then(({ modelService }) => {
-      modelService.getModels({ page: 1, size: 20 }).then((res: any) => {
+      modelService.getModels({ page: 1, size: 100 }).then((res: any) => {
         const records = res?.data?.records || res?.records || [];
         if (records.length > 0) {
           setRecommendedModels(records);
