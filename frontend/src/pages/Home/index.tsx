@@ -1032,9 +1032,14 @@ const Home: React.FC = () => {
                       ))}
                     </svg>
 
-                    {/* 中心数字 - 最高层不被遮挡 */}
+                    {/* 核心引力场光晕 */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ zIndex: 1 }}>
+                      <div className="w-[500px] h-[500px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #818cf8 0%, #6366f1 30%, transparent 70%)', filter: 'blur(60px)' }} />
+                    </div>
+
+                    {/* 中心数字 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] pointer-events-none text-center">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[160px] rounded-full bg-white blur-[30px]" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[170px] rounded-full bg-white blur-[35px]" />
                       <div className="relative">
                         <div className="text-7xl md:text-8xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-500 to-purple-700 bg-clip-text text-transparent">
                           {counts.models}+
