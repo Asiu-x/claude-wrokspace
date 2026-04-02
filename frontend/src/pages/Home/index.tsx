@@ -1010,75 +1010,30 @@ const Home: React.FC = () => {
                     {heroNodes.map((h) => {
                       const isHovered = hoveredModel === h.i;
                       return (
-                        <div
-                          key={`node-${n.flatIdx}`}
-                          className="absolute"
-                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%`, transform: 'translate(-50%, -50%)', zIndex: isHovered ? 9999 : 10 }}
-                          onMouseEnter={() => setHoveredModel(n.flatIdx)}
+                        <motion.div
+                          key={`hero-${h.i}`}
+                          className="absolute cursor-pointer"
+                          style={{ left: `${h.leftPct}%`, top: `${h.topPct}%`, transform: 'translate(-50%, -50%)', zIndex: isHovered ? 9999 : 20 }}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.5, delay: 0.2 + h.i * 0.08 }}
+                          whileHover={{ scale: 1.06, y: -3 }}
+                          onMouseEnter={() => setHoveredModel(h.i)}
                           onMouseLeave={() => setHoveredModel(null)}
+                          onClick={() => navigate(`/models/${h.model.id}`)}
                         >
-                          {/* 透明 hover 触发区 */}
-                          <div
-                            className="absolute cursor-pointer"
-                            style={{
-                              width: n.dotSize * 4,
-                              height: n.dotSize * 4,
-                              left: '50%',
-                              top: '50%',
-                              transform: 'translate(-50%, -50%)',
-                            }}
-                            onClick={() => navigate(`/models/${n.model.id}`)}
-                          />
-                          {/* 名称标签 - 紧贴圆点下方 */}
-                          <div
-                            className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
-                            style={{ top: n.dotSize / 2 + 4, fontFamily: "'Inter', system-ui" }}
-                          >
-                            <span className="text-[9px] font-bold text-zinc-400">{n.model.name}</span>
+                          <div className={`w-[170px] p-4 rounded-2xl bg-white/90 backdrop-blur-md border transition-all duration-300 ${isHovered ? 'border-indigo-300 shadow-xl shadow-indigo-100/30' : 'border-zinc-200/80 shadow-md shadow-zinc-200/30'}`}>
+                            <div className="text-[14px] font-black text-zinc-900 mb-1 tracking-tight" style={{ fontFamily: "'Inter', system-ui" }}>{h.model.name}</div>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{h.model.parameters}</span>
+                              {h.model.source && (
+                                <span className={`text-[8px] px-1 py-0.5 rounded font-semibold ${h.model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{h.model.source}</span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-zinc-400 line-clamp-1">{h.model.description}</p>
                           </div>
-                          {/* Hover 悬浮弹窗 - z-[100] 最高层 */}
-                          <AnimatePresence>
-                            {isHovered && (
-                              <motion.div
-                                className="absolute w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white backdrop-blur-xl"
-                                style={{
-                                  zIndex: 9999,
-                                  boxShadow: '0 12px 40px -6px rgba(0,0,0,0.15)',
-                                  left: n.leftPct > 50 ? 'auto' : 'calc(50% + 20px)',
-                                  right: n.leftPct > 50 ? 'calc(50% + 20px)' : 'auto',
-                                  top: n.topPct > 50 ? 'auto' : 'calc(50% + 16px)',
-                                  bottom: n.topPct > 50 ? 'calc(50% + 16px)' : 'auto',
-                                }}
-                                initial={{ opacity: 0, scale: 0.92 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.92 }}
-                                transition={{ duration: 0.2 }}
-                                onMouseEnter={() => setHoveredModel(n.flatIdx)}
-                                onMouseLeave={() => setHoveredModel(null)}
-                                onClick={(e) => { e.stopPropagation(); navigate(`/models/${n.model.id}`); }}
-                              >
-                                <div className="text-[13px] font-black text-zinc-900 mb-1" style={{ fontFamily: "'Inter', system-ui" }}>{n.model.name}</div>
-                                <p className="text-[11px] text-zinc-400 mb-3 line-clamp-2 leading-relaxed">{n.model.description}</p>
-                                <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold font-mono">{n.model.parameters}</span>
-                                  {n.model.source && (
-                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-semibold ${n.model.source === '自研' ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 text-zinc-400'}`}>{n.model.source}</span>
-                                  )}
-                                  <span className="text-[9px] text-zinc-400">{n.model.framework}</span>
-                                </div>
-                                <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
-                                  <div className="flex items-center gap-0.5">
-                                    <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                                    <span className="text-[10px] text-zinc-500 font-bold">{n.model.rating?.toFixed(1)}</span>
-                                  </div>
-                                  <span className="text-[10px] text-indigo-500 font-medium inline-flex items-center gap-1">
-                                    查看详情 <ArrowRight className="h-2.5 w-2.5" />
-                                  </span>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
