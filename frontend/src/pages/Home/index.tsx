@@ -976,7 +976,7 @@ const Home: React.FC = () => {
                     onMouseLeave={() => setHoveredModel(null)}
                   >
                     {/* SVG：星尘 + 同心圆轨道 + 辐射连线 */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${VB} ${VB}`}>
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${VBW} ${VBH}`}>
                       {/* 星尘 */}
                       {bgStars.map((s, i) => (
                         <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
