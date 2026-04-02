@@ -981,9 +981,9 @@ const Home: React.FC = () => {
                       {bgStars.map((s, i) => (
                         <circle key={`d-${i}`} cx={s.x} cy={s.y} r={s.s} fill="#818cf8" opacity={s.o} />
                       ))}
-                      {/* 同心圆虚线轨道 */}
+                      {/* 同心椭圆虚线轨道 */}
                       {orbits.map((r, i) => (
-                        <circle key={`orb-${i}`} cx={C} cy={C} r={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
+                        <ellipse key={`orb-${i}`} cx={CX} cy={CY} rx={r * orbitStretch} ry={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.35" />
                       ))}
                       {/* 中心到每个节点的辐射连线 - 常驻显示 */}
                       {allNodes.map((n, i) => (
