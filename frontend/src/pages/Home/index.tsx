@@ -1008,9 +1008,9 @@ const Home: React.FC = () => {
                       ))}
                     </svg>
 
-                    {/* 中心数字 */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[5] pointer-events-none text-center">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[160px] rounded-full bg-white/80 blur-[30px]" />
+                    {/* 中心数字 - 最高层不被遮挡 */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] pointer-events-none text-center">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[140px] rounded-full bg-white/90 blur-[40px]" />
                       <div className="relative">
                         <div className="text-7xl md:text-8xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-500 to-purple-700 bg-clip-text text-transparent">
                           {counts.models}+
@@ -1019,36 +1019,52 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 20 个固定位置可交互节点 */}
+                    {/* 100 个固定位置可交互节点 */}
                     {allNodes.map((n) => {
                       const isHovered = hoveredModel === n.flatIdx;
+                      // 中心区域（内 2 层轨道）不放交互触发区，避免遮挡数字
+                      const isInnerOrbit = n.orbitR <= orbits[1];
                       return (
                         <div
                           key={`node-${n.flatIdx}`}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%` }}
-                          onMouseEnter={() => setHoveredModel(n.flatIdx)}
-                          onMouseLeave={() => setHoveredModel(null)}
+                          className={`absolute z-10 ${isInnerOrbit ? 'pointer-events-none' : ''}`}
+                          style={{ left: `${n.leftPct}%`, top: `${n.topPct}%`, transform: 'translate(-50%, -50%)' }}
+                          onMouseEnter={isInnerOrbit ? undefined : () => setHoveredModel(n.flatIdx)}
+                          onMouseLeave={isInnerOrbit ? undefined : () => setHoveredModel(null)}
                         >
-                          <div className="cursor-pointer relative"
-                            style={{ width: n.dotSize * 3, height: n.dotSize * 3, marginLeft: -n.dotSize * 1.5, marginTop: -n.dotSize * 1.5 }}
-                            onClick={() => navigate(`/models/${n.model.id}`)}
-                          />
-                          <div className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
-                            style={{ top: n.dotSize / 2 + 6, fontFamily: "'Inter', system-ui" }}>
-                            <span className="text-[10px] font-bold text-zinc-400">{n.model.name}</span>
+                          {/* 透明 hover 触发区 - 居中对齐圆点 */}
+                          {!isInnerOrbit && (
+                            <div
+                              className="absolute cursor-pointer"
+                              style={{
+                                width: n.dotSize * 4,
+                                height: n.dotSize * 4,
+                                left: '50%',
+                                top: '50%',
+                                transform: 'translate(-50%, -50%)',
+                              }}
+                              onClick={() => navigate(`/models/${n.model.id}`)}
+                            />
+                          )}
+                          {/* 名称标签 - 紧贴圆点下方 */}
+                          <div
+                            className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-opacity duration-200 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
+                            style={{ top: n.dotSize / 2 + 4, fontFamily: "'Inter', system-ui" }}
+                          >
+                            <span className="text-[9px] font-bold text-zinc-400">{n.model.name}</span>
                           </div>
+                          {/* Hover 悬浮弹窗 - z-[100] 最高层 */}
                           <AnimatePresence>
                             {isHovered && (
                               <motion.div
-                                className="absolute z-50 w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-lg"
+                                className="absolute w-[220px] p-4 rounded-xl border border-zinc-200/60 bg-white/95 backdrop-blur-xl"
                                 style={{
-                                  left: n.leftPct > 50 ? 'auto' : '100%',
-                                  right: n.leftPct > 50 ? '100%' : 'auto',
-                                  top: '50%', transform: 'translateY(-50%)',
-                                  marginLeft: n.leftPct > 50 ? 0 : 14,
-                                  marginRight: n.leftPct > 50 ? 14 : 0,
-                                  boxShadow: '0 8px 30px -4px rgba(0,0,0,0.1)',
+                                  zIndex: 100,
+                                  left: n.leftPct > 50 ? 'auto' : 'calc(50% + 20px)',
+                                  right: n.leftPct > 50 ? 'calc(50% + 20px)' : 'auto',
+                                  top: n.topPct > 50 ? 'auto' : 'calc(50% + 16px)',
+                                  bottom: n.topPct > 50 ? 'calc(50% + 16px)' : 'auto',
+                                  boxShadow: '0 12px 40px -6px rgba(0,0,0,0.12)',
                                 }}
                                 initial={{ opacity: 0, scale: 0.92 }}
                                 animate={{ opacity: 1, scale: 1 }}
