@@ -1007,8 +1007,8 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* 5 个 Hero 卡片 + 弹窗 */}
-                    {allNodes.map((n) => {
-                      const isHovered = hoveredModel === n.flatIdx;
+                    {heroNodes.map((h) => {
+                      const isHovered = hoveredModel === h.i;
                       return (
                         <div
                           key={`node-${n.flatIdx}`}
