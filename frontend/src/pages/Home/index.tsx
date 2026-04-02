@@ -979,18 +979,50 @@ const Home: React.FC = () => {
                     }}
                     onMouseLeave={() => setHoveredModel(null)}
                   >
-                    {/* SVG：虚线轨道 + 背景微光点 + 脉冲 */}
+                    {/* SVG：轨道 + 星河粒子 + Hero 连线 + 脉冲 */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${VBW} ${VBH}`}>
+                      <defs>
+                        <linearGradient id="flow-line" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
+                          <stop offset="40%" stopColor="#818cf8" stopOpacity="0.5" />
+                          <stop offset="60%" stopColor="#a5b4fc" stopOpacity="0.7" />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+
                       {/* 同心椭圆虚线轨道 */}
                       {orbits.map((r, i) => (
-                        <ellipse key={`orb-${i}`} cx={CX} cy={CY} rx={r * stretch} ry={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.3" />
+                        <ellipse key={`orb-${i}`} cx={CX} cy={CY} rx={r * stretch} ry={r} fill="none" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="4 8" opacity="0.25" />
                       ))}
-                      {/* 背景微光点 — 无文字 */}
-                      {bgDots.map((d, i) => (
-                        <circle key={`bg-${i}`} cx={d.x} cy={d.y} r={d.sz} fill="#818cf8" opacity={d.op}>
-                          <animate attributeName="opacity" values={`${d.op};${d.op + 0.15};${d.op}`} dur={`${3 + (i % 7) * 0.4}s`} repeatCount="indefinite" />
+
+                      {/* 150+ 星河粒子 */}
+                      {starDust.map((d, i) => (
+                        <circle key={`sd-${i}`} cx={d.x} cy={d.y} r={d.sz} fill="#818cf8" opacity={d.op}>
+                          <animate attributeName="opacity" values={`${d.op};${Math.min(d.op + 0.18, 0.6)};${d.op}`} dur={`${2.5 + (i % 9) * 0.4}s`} repeatCount="indefinite" />
                         </circle>
                       ))}
+
+                      {/* 5 条 Hero 专属弧线连接 */}
+                      {heroNodes.map((h, i) => {
+                        // 贝塞尔弧线：从中心到 Hero，中点偏移制造弧度
+                        const mx = (CX + h.x) / 2 + (i % 2 === 0 ? 40 : -40);
+                        const my = (CY + h.y) / 2 + (i % 2 === 0 ? -30 : 30);
+                        const d = `M ${CX} ${CY} Q ${mx} ${my} ${h.x} ${h.y}`;
+                        const pathLen = Math.hypot(h.x - CX, h.y - CY) * 1.2;
+                        return (
+                          <g key={`conn-${i}`}>
+                            {/* 底线 */}
+                            <path d={d} fill="none" stroke="#cbd5e1" strokeWidth="1" opacity="0.4" />
+                            {/* 流光 */}
+                            <path d={d} fill="none" stroke="url(#flow-line)" strokeWidth="2" strokeLinecap="round"
+                              strokeDasharray={`${pathLen * 0.12} ${pathLen * 0.88}`}
+                            >
+                              <animate attributeName="stroke-dashoffset" values={`${pathLen};${-pathLen * 0.12}`} dur={`${3 + i * 0.5}s`} repeatCount="indefinite" />
+                            </path>
+                          </g>
+                        );
+                      })}
+
                       {/* 中心脉冲 */}
                       {[0, 1, 2].map(ring => (
                         <circle key={`p-${ring}`} cx={CX} cy={CY} fill="none" stroke="#6366f1" strokeWidth={1}>
