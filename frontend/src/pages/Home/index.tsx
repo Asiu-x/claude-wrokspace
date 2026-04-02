@@ -1012,7 +1012,7 @@ const Home: React.FC = () => {
 
                     {/* 中心数字 - 最高层不被遮挡 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] pointer-events-none text-center">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[140px] rounded-full bg-white/90 blur-[40px]" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[160px] rounded-full bg-white blur-[30px]" />
                       <div className="relative">
                         <div className="text-7xl md:text-8xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-500 to-purple-700 bg-clip-text text-transparent">
                           {counts.models}+
