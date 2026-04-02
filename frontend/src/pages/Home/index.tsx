@@ -1005,12 +1005,15 @@ const Home: React.FC = () => {
                       ))}
                     </svg>
 
-                    {/* 中心数字 - 底层 */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none text-center">
-                      <div className="text-8xl md:text-9xl font-black tracking-tighter leading-none text-indigo-100/40">
-                        {counts.models}+
+                    {/* 中心数字 */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[5] pointer-events-none text-center">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[160px] rounded-full bg-white/80 blur-[30px]" />
+                      <div className="relative">
+                        <div className="text-7xl md:text-8xl font-black tracking-tighter leading-none bg-gradient-to-br from-indigo-500 to-purple-700 bg-clip-text text-transparent">
+                          {counts.models}+
+                        </div>
+                        <div className="text-sm text-zinc-400 font-semibold mt-2 tracking-wider">接入生态模型</div>
                       </div>
-                      <div className="text-sm text-zinc-300/50 font-medium mt-2 tracking-wide">接入生态模型</div>
                     </div>
 
                     {/* 20 个固定位置可交互节点 */}
