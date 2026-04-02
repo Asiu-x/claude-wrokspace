@@ -938,13 +938,15 @@ const Home: React.FC = () => {
                 // 每层分配节点数（总计 100）
                 const layerCounts = [8, 10, 12, 13, 14, 15, 15, 13];
                 // 分配模型到各层并计算固定位置
+                // 使用黄金角（137.508°）作为层间偏移，确保相邻层不对齐
+                const GOLDEN_ANGLE = 137.508;
                 let nodeIdx = 0;
                 const allNodes = orbits.flatMap((r, oi) => {
                   const count = layerCounts[oi];
                   const nodes = [];
                   for (let mi = 0; mi < count && nodeIdx < allModelsData.length; mi++) {
-                    const angleOffset = oi * 17; // 每层错开
-                    const angle = (mi / count) * 360 + angleOffset;
+                    // 每层均匀分布 + 黄金角层间偏移，确保整体散布均匀
+                    const angle = (mi / count) * 360 + oi * GOLDEN_ANGLE;
                     const rad = (angle * Math.PI) / 180;
                     const px = CX + Math.cos(rad) * r * orbitStretch;
                     const py = CY + Math.sin(rad) * r;
